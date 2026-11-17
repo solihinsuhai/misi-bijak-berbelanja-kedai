@@ -1,0 +1,2226 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Misi Bijak Berbelanja – Kedai Alat Tulis</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Fredoka & Inter for friendly storybook typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FFFDF5;
+            background-image: radial-gradient(#FDE68A 1.2px, transparent 1.2px);
+            background-size: 24px 24px;
+            color: #1E293B;
+            overflow-x: hidden;
+        }
+        h1, h2, h3, .font-comic {
+            font-family: 'Fredoka', sans-serif;
+        }
+        /* Custom cute scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #FEF3C7;
+            border-radius: 9999px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #F59E0B;
+            border-radius: 9999px;
+        }
+        /* Tactile storybook button styles */
+        .btn-game {
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 0 rgba(0, 0, 0, 0.15);
+        }
+        .btn-game:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 0 rgba(0, 0, 0, 0.15);
+        }
+        .btn-game:active:not(:disabled) {
+            transform: translateY(2px);
+            box-shadow: 0 2px 0 rgba(0, 0, 0, 0.15);
+        }
+        .btn-game:disabled {
+            opacity: 0.55;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        /* Wooden shelf effect */
+        .wooden-shelf {
+            border-bottom: 8px solid #D97706;
+            box-shadow: 0 6px 12px -4px rgba(180, 83, 9, 0.2);
+        }
+        /* Banknote & Coin styling */
+        .banknote-card {
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+        .banknote-card:hover:not(:disabled) {
+            transform: scale(1.03);
+        }
+        @keyframes bounceGentle {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-5px); }
+        }
+        .animate-bounce-gentle {
+            animation: bounceGentle 2.4s infinite ease-in-out;
+        }
+        @keyframes popIn {
+            0% { transform: scale(0.92); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop-in {
+            animation: popIn 0.25s ease-out forwards;
+        }
+        /* Receipt zigzag border */
+        .receipt-edge {
+            background: linear-gradient(135deg, #ffffff 50%, transparent 50%), linear-gradient(225deg, #ffffff 50%, transparent 50%);
+            background-position: top left, top left;
+            background-size: 16px 16px;
+            background-repeat: repeat-x;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- ===================================================================
+         TOP HEADER SECTION: TITLE, PROGRESS, LIVE BUDGET & RESET BUTTON
+    ==================================================================== -->
+    <header class="bg-gradient-to-r from-amber-100 via-yellow-50 to-sky-100 border-b-4 border-amber-300 sticky top-0 z-30 shadow-sm">
+        <div class="max-w-7xl mx-auto px-3 sm:px-6 py-2.5">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+                <!-- Shop Title & Tagline -->
+                <div class="flex items-center gap-2">
+                    <div class="w-12 h-12 rounded-2xl bg-amber-400 border-2 border-amber-600 flex items-center justify-center text-2xl shadow-sm shrink-0">
+                        🏪
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <h1 class="text-lg sm:text-xl md:text-2xl font-bold text-amber-900 leading-tight">
+                                MISI BIJAK BERBELANJA
+                            </h1>
+                            <span class="px-2.5 py-0.5 text-xs font-bold bg-sky-100 text-sky-800 rounded-full border border-sky-300">
+                                Tahun 2 Bijak • 4.7.1
+                            </span>
+                        </div>
+                        <p class="text-xs sm:text-sm font-medium text-amber-700">
+                            "Belajar Mengira, Bijak Berbelanja!"
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Live Budget Dashboard Pill -->
+                <div class="flex items-center gap-2 sm:gap-4 bg-amber-50 border-2 border-amber-300 rounded-2xl px-3 py-1.5 shadow-inner">
+                    <div class="text-center border-r border-amber-200 pr-2 sm:pr-3">
+                        <span class="block text-[10px] sm:text-xs font-bold uppercase text-amber-700">Bajet Asal</span>
+                        <span class="font-comic text-sm sm:text-base md:text-lg font-bold text-slate-800">RM80.00</span>
+                    </div>
+                    <div class="text-center border-r border-amber-200 pr-2 sm:pr-3">
+                        <span class="block text-[10px] sm:text-xs font-bold uppercase text-pink-600">Jumlah Belian</span>
+                        <span id="header-total-purchase" class="font-comic text-sm sm:text-base md:text-lg font-bold text-pink-600">RM0.00</span>
+                    </div>
+                    <div class="text-center">
+                        <span class="block text-[10px] sm:text-xs font-bold uppercase text-emerald-700">Baki Bajet</span>
+                        <span id="header-remaining-budget" class="font-comic text-sm sm:text-base md:text-lg font-bold text-emerald-600">RM80.00</span>
+                    </div>
+                </div>
+
+                <!-- Reset & Sound Controls -->
+                <div class="flex items-center gap-2">
+                    <button id="btn-sound-toggle" onclick="toggleSound()" title="Tukar Tetapan Bunyi" class="p-2 sm:px-3 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 rounded-xl border border-emerald-300 text-xs font-bold flex items-center gap-1.5 transition">
+                        <span id="sound-toggle-icon">🔊</span>
+                        <span id="sound-toggle-label">Bunyi: ON</span>
+                    </button>
+                    <button onclick="openResetModal()" title="Mula Semula Aktiviti" class="p-2 sm:px-3 bg-rose-100 hover:bg-rose-200 text-rose-700 rounded-xl border border-rose-300 text-xs font-bold flex items-center gap-1.5 transition">
+                        <span>🔄</span>
+                        <span>Mula Semula</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 5-Stage Learning Progression Stepper -->
+            <nav aria-label="Tahap Pembelajaran" class="mt-2.5 pt-2 border-t border-amber-200/80 overflow-x-auto">
+                <ol id="stage-stepper" class="flex items-center justify-between min-w-[600px] gap-1.5">
+                    <!-- Rendered dynamically by JS -->
+                </ol>
+            </nav>
+        </div>
+    </header>
+
+    <!-- ===================================================================
+         SHOPKEEPER GUIDE BANNER (PAK CIK KEDAI ALAT TULIS)
+    ==================================================================== -->
+    <section class="max-w-7xl w-full mx-auto px-3 sm:px-6 pt-3">
+        <div id="shopkeeper-banner" class="bg-gradient-to-r from-sky-100 via-indigo-50 to-purple-100 border-2 border-sky-300 rounded-3xl p-3 sm:p-4 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="flex items-center gap-3 sm:gap-4">
+                <!-- Illustrated Friendly Shopkeeper Image (Pak Cik Ahmad) -->
+                <div class="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl bg-sky-100 border-2 border-amber-500 flex items-center justify-center shrink-0 animate-bounce-gentle shadow-sm overflow-hidden">
+                    <img id="pakcik-ahmad-img"
+                         src="data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 240'%3E%3Cdefs%3E%3ClinearGradient id='bg' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0%25' stop-color='%23DBEAFE'/%3E%3Cstop offset='100%25' stop-color='%23FEF3C7'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='240' height='240' fill='url(%23bg)'/%3E%3C!-- Shop shelves background --%3E%3Crect x='8' y='28' width='54' height='150' rx='6' fill='%23D97706' opacity='0.35'/%3E%3Crect x='14' y='40' width='10' height='28' rx='2' fill='%23F472B6'/%3E%3Crect x='26' y='36' width='10' height='32' rx='2' fill='%2338BDF8'/%3E%3Crect x='38' y='42' width='10' height='26' rx='2' fill='%2334D399'/%3E%3Crect x='178' y='28' width='54' height='150' rx='6' fill='%23D97706' opacity='0.35'/%3E%3Crect x='186' y='44' width='36' height='38' rx='10' fill='%2360A5FA' opacity='0.8'/%3E%3Crect x='186' y='92' width='36' height='38' rx='10' fill='%23F472B6' opacity='0.8'/%3E%3C!-- Signboard --%3E%3Crect x='58' y='6' width='124' height='30' rx='8' fill='%23FDE68A' stroke='%2392400E' stroke-width='3'/%3E%3Ctext x='120' y='25' text-anchor='middle' font-family='sans-serif' font-weight='bold' font-size='12' fill='%2378350F'%3EKedai Alat Tulis%3C/text%3E%3C!-- Waving Right Hand --%3E%3Cg transform='translate(46,118) rotate(-18)'%3E%3Crect x='-8' y='12' width='22' height='34' rx='10' fill='%23E7C697' stroke='%235C3A21' stroke-width='3'/%3E%3Ccircle cx='3' cy='8' r='13' fill='%23F4C29F' stroke='%235C3A21' stroke-width='3'/%3E%3Crect x='-9' y='-10' width='5' height='16' rx='2.5' fill='%23F4C29F' stroke='%235C3A21' stroke-width='2.5'/%3E%3Crect x='-2' y='-13' width='5' height='18' rx='2.5' fill='%23F4C29F' stroke='%235C3A21' stroke-width='2.5'/%3E%3Crect x='5' y='-12' width='5' height='17' rx='2.5' fill='%23F4C29F' stroke='%235C3A21' stroke-width='2.5'/%3E%3Crect x='11' y='-8' width='5' height='14' rx='2.5' fill='%23F4C29F' stroke='%235C3A21' stroke-width='2.5'/%3E%3C/g%3E%3C!-- Beige Shirt &amp; Shoulders --%3E%3Cpath d='M56 210 C56 155, 82 142, 120 142 C158 142, 184 155, 184 210 Z' fill='%23E7C697' stroke='%235C3A21' stroke-width='3.5'/%3E%3C!-- Extended Left Hand --%3E%3Cg transform='translate(184,158) rotate(12)'%3E%3Crect x='-8' y='-8' width='28' height='18' rx='8' fill='%23E7C697' stroke='%235C3A21' stroke-width='3'/%3E%3Cellipse cx='24' cy='2' rx='13' ry='9' fill='%23F4C29F' stroke='%235C3A21' stroke-width='3'/%3E%3C/g%3E%3C!-- Dark Blue Apron --%3E%3Cpath d='M84 148 L156 148 L164 210 L76 210 Z' fill='%232B3A67' stroke='%231E293B' stroke-width='3.5'/%3E%3Crect x='88' y='138' width='9' height='22' rx='3' fill='%232B3A67' stroke='%231E293B' stroke-width='2.5'/%3E%3Crect x='143' y='138' width='9' height='22' rx='3' fill='%232B3A67' stroke='%231E293B' stroke-width='2.5'/%3E%3C!-- Apron Pocket with Pens --%3E%3Crect x='124' y='170' width='22' height='20' rx='3' fill='%231E293B' opacity='0.45'/%3E%3Crect x='128' y='162' width='4' height='10' rx='1.5' fill='%23FACC15'/%3E%3Crect x='134' y='160' width='4' height='12' rx='1.5' fill='%2338BDF8'/%3E%3Crect x='140' y='163' width='4' height='9' rx='1.5' fill='%23F43F5E'/%3E%3C!-- Neck --%3E%3Crect x='108' y='124' width='24' height='22' rx='8' fill='%23E5A982' stroke='%235C3A21' stroke-width='3'/%3E%3C!-- Ears --%3E%3Ccircle cx='80' cy='96' r='10' fill='%23F4C29F' stroke='%235C3A21' stroke-width='3'/%3E%3Ccircle cx='160' cy='96' r='10' fill='%23F4C29F' stroke='%235C3A21' stroke-width='3'/%3E%3C!-- Grey Hair Sides --%3E%3Cpath d='M80 92 C78 68, 92 58, 120 58 C148 58, 162 68, 160 92' fill='%2394A3B8' stroke='%23475569' stroke-width='3'/%3E%3C!-- Face --%3E%3Cpath d='M84 82 C84 62, 156 62, 156 82 C158 112, 144 132, 120 132 C96 132, 82 112, 84 82 Z' fill='%23F4C29F' stroke='%235C3A21' stroke-width='3.5'/%3E%3C!-- White Kopiah --%3E%3Cpath d='M86 72 C86 48, 154 48, 154 72 L152 78 C132 73, 108 73, 88 78 Z' fill='%23FFFFFF' stroke='%23475569' stroke-width='3'/%3E%3C!-- Eyebrows --%3E%3Cpath d='M95 82 Q103 77 111 82' fill='none' stroke='%2364748B' stroke-width='3.5' stroke-linecap='round'/%3E%3Cpath d='M129 82 Q137 77 145 82' fill='none' stroke='%2364748B' stroke-width='3.5' stroke-linecap='round'/%3E%3C!-- Happy Smiling Eyes --%3E%3Cpath d='M97 92 Q104 85 111 92' fill='none' stroke='%231E293B' stroke-width='3.5' stroke-linecap='round'/%3E%3Cpath d='M129 92 Q136 85 143 92' fill='none' stroke='%231E293B' stroke-width='3.5' stroke-linecap='round'/%3E%3C!-- Glasses --%3E%3Crect x='91' y='84' width='24' height='16' rx='5' fill='none' stroke='%231E293B' stroke-width='3'/%3E%3Crect x='125' y='84' width='24' height='16' rx='5' fill='none' stroke='%231E293B' stroke-width='3'/%3E%3Cline x1='115' y1='91' x2='125' y2='91' stroke='%231E293B' stroke-width='3'/%3E%3C!-- Nose --%3E%3Cpath d='M117 95 Q120 103 124 100' fill='none' stroke='%239A5B3A' stroke-width='3' stroke-linecap='round'/%3E%3C!-- Grey Moustache --%3E%3Cpath d='M102 108 Q120 101 138 108 Q134 113 120 110 Q106 113 102 108 Z' fill='%23CBD5E1' stroke='%23475569' stroke-width='2.5'/%3E%3C!-- Cheerful Open Smile --%3E%3Cpath d='M108 112 Q120 124 132 112 Z' fill='%23E11D48' stroke='%235C3A21' stroke-width='2.5'/%3E%3C!-- Grey Goatee Beard --%3E%3Cpath d='M111 124 Q120 138 129 124 Q120 127 111 124 Z' fill='%23CBD5E1' stroke='%23475569' stroke-width='2.5'/%3E%3C!-- Wooden Counter Desk --%3E%3Crect x='0' y='204' width='240' height='36' fill='%23D97706' stroke='%2378350F' stroke-width='3'/%3E%3Crect x='14' y='192' width='48' height='12' rx='3' fill='%2338BDF8' stroke='%230369A1' stroke-width='2.5'/%3E%3Crect x='16' y='182' width='44' height='10' rx='3' fill='%23F472B6' stroke='%239D174D' stroke-width='2.5'/%3E%3C/svg%3E"
+                         alt="Pak Cik Ahmad (Peniaga Kedai Alat Tulis)"
+                         class="w-full h-full object-contain">
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="px-2.5 py-0.5 bg-amber-400 text-amber-950 font-comic font-bold text-xs rounded-full">
+                            Pak Cik Ahmad (Peniaga)
+                        </span>
+                        <span id="feedback-badge" class="hidden px-2.5 py-0.5 bg-emerald-500 text-white font-bold text-xs rounded-full">
+                            Info
+                        </span>
+                    </div>
+                    <p id="shopkeeper-message" class="text-sm sm:text-base font-medium text-slate-800 mt-1 leading-snug">
+                        Selamat datang ke Kedai Alat Tulis Ceria! Kumpulan kamu diberi bajet <strong>RM80.00</strong>. Jom pilih barang keperluan sekolah dengan bijak!
+                    </p>
+                </div>
+            </div>
+
+            <!-- Hint Button -->
+            <button onclick="showShopkeeperHint()" class="btn-game shrink-0 bg-amber-400 hover:bg-amber-300 text-amber-950 font-bold text-xs sm:text-sm px-4 py-2.5 rounded-2xl border-2 border-amber-600 flex items-center gap-1.5">
+                <span>💡</span>
+                <span>Minta Petunjuk</span>
+            </button>
+        </div>
+    </section>
+
+    <!-- ===================================================================
+         MAIN DYNAMIC STAGE WORKSPACE
+    ==================================================================== -->
+    <main class="max-w-7xl w-full mx-auto px-3 sm:px-6 py-4 flex-1">
+
+        <!-- ===============================================================
+             STAGE 1: SELAMAT DATANG KE KEDAI ALAT TULIS
+        ================================================================ -->
+        <div id="stage-1" class="stage-view space-y-5 animate-pop-in">
+            <!-- Hero Welcome Card -->
+            <div class="bg-white border-4 border-amber-300 rounded-3xl p-5 sm:p-8 shadow-md relative overflow-hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                    <div class="lg:col-span-7 space-y-4">
+                        <div class="inline-flex items-center gap-2 bg-pink-100 text-pink-800 font-bold text-xs sm:text-sm px-3.5 py-1.5 rounded-full border border-pink-300">
+                            <span>🎯</span>
+                            <span>Aktiviti Utama & Penerokaan (Kelas 2 Bijak)</span>
+                        </div>
+                        <h2 class="text-2xl sm:text-4xl font-bold text-amber-900 leading-tight">
+                            Selamat Datang ke Kedai Alat Tulis Ceria!
+                        </h2>
+                        <p class="text-slate-700 text-sm sm:text-base leading-relaxed">
+                            Cabaran Kumpulan: <strong>"Bolehkah kamu menjadi pembeli yang bijak dan menyelesaikan misi membeli-belah tanpa melebihi bajet RM80.00?"</strong>
+                        </p>
+
+                        <!-- Mission Rules Box -->
+                        <div class="bg-amber-50 border-2 border-amber-300 rounded-2xl p-4 space-y-2">
+                            <h3 class="font-comic font-bold text-amber-900 text-base flex items-center gap-2">
+                                <span>📜</span> Peraturan Misi Kumpulan:
+                            </h3>
+                            <ul class="text-xs sm:text-sm text-slate-700 space-y-1.5 list-disc list-inside">
+                                <li>Setiap kumpulan dibekalkan wang bajet sebanyak <strong>BAJET ASAL: RM80.00</strong>.</li>
+                                <li>Teroka rak kedai, pilih alat tulis yang diperlukan dan kira jumlah harga.</li>
+                                <li>Pastikan jumlah belian <strong>tidak melebihi RM80.00</strong>.</li>
+                                <li>Bayar menggunakan wang kertas dan syiling Malaysia yang tersedia, kemudian kira <strong>baki wang</strong> dengan tepat!</li>
+                            </ul>
+                        </div>
+
+                        <!-- Group Selector -->
+                        <div class="flex flex-wrap items-center gap-3 pt-1">
+                            <label for="group-name-input" class="font-comic font-bold text-sm text-slate-700">Nama Kumpulan:</label>
+                            <select id="group-name-input" onchange="updateGroupName(this.value)" class="bg-sky-50 border-2 border-sky-300 rounded-xl px-3 py-2 text-sm font-bold text-sky-900 focus:outline-none focus:border-sky-500">
+                                <option value="Kumpulan 1 (Bijak)">Kumpulan 1 (Bijak)</option>
+                                <option value="Kumpulan 2 (Cerdas)">Kumpulan 2 (Cerdas)</option>
+                                <option value="Kumpulan 3 (Pintar)">Kumpulan 3 (Pintar)</option>
+                                <option value="Kumpulan 4 (Bestari)">Kumpulan 4 (Bestari)</option>
+                                <option value="Kumpulan 5 (Cemerlang)">Kumpulan 5 (Cemerlang)</option>
+                                <option value="Kumpulan 6 (Gemilang)">Kumpulan 6 (Gemilang)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Illustrated Shop Front SVG -->
+                    <div class="lg:col-span-5 flex flex-col items-center">
+                        <div class="bg-gradient-to-b from-sky-100 to-emerald-50 border-2 border-sky-300 rounded-3xl p-4 w-full flex flex-col items-center">
+                            <svg viewBox="0 0 320 210" class="w-full max-w-xs h-auto">
+                                <!-- Roof Awning -->
+                                <path d="M20 70 L300 70 L280 30 L40 30 Z" fill="#F43F5E"/>
+                                <path d="M40 30 L85 30 L75 70 L20 70 Z" fill="#FBBF24"/>
+                                <path d="M130 30 L175 30 L175 70 L125 70 Z" fill="#FBBF24"/>
+                                <path d="M220 30 L265 30 L280 70 L225 70 Z" fill="#FBBF24"/>
+                                <!-- Scallops -->
+                                <circle cx="42" cy="70" r="22" fill="#FBBF24"/>
+                                <circle cx="86" cy="70" r="22" fill="#F43F5E"/>
+                                <circle cx="130" cy="70" r="22" fill="#FBBF24"/>
+                                <circle cx="174" cy="70" r="22" fill="#F43F5E"/>
+                                <circle cx="218" cy="70" r="22" fill="#FBBF24"/>
+                                <circle cx="262" cy="70" r="22" fill="#F43F5E"/>
+                                <!-- Shop Body -->
+                                <rect x="32" y="82" width="256" height="115" rx="8" fill="#FEF3C7" stroke="#D97706" stroke-width="4"/>
+                                <!-- Signboard -->
+                                <rect x="75" y="10" width="170" height="28" rx="8" fill="#10B981" stroke="#065F46" stroke-width="3"/>
+                                <text x="160" y="29" text-anchor="middle" fill="#FFFFFF" font-family="Fredoka, sans-serif" font-weight="bold" font-size="14">KEDAI ALAT TULIS</text>
+                                <!-- Display Window -->
+                                <rect x="52" y="102" width="120" height="70" rx="8" fill="#E0F2FE" stroke="#0284C7" stroke-width="3"/>
+                                <!-- Books & Pencils in Window -->
+                                <rect x="65" y="135" width="16" height="34" rx="2" fill="#F472B6"/>
+                                <rect x="83" y="130" width="16" height="39" rx="2" fill="#38BDF8"/>
+                                <rect x="101" y="138" width="16" height="31" rx="2" fill="#A78BFA"/>
+                                <polygon points="140,122 146,110 152,122" fill="#F59E0B"/>
+                                <rect x="140" y="122" width="12" height="45" fill="#FBBF24"/>
+                                <!-- Shop Door -->
+                                <rect x="195" y="102" width="70" height="95" rx="6" fill="#FDBA74" stroke="#9A3412" stroke-width="3"/>
+                                <circle cx="253" cy="152" r="5" fill="#9A3412"/>
+                                <rect x="208" y="115" width="44" height="30" rx="4" fill="#FFFFFF"/>
+                                <text x="230" y="134" text-anchor="middle" fill="#059669" font-weight="bold" font-size="12">BUKA</text>
+                            </svg>
+                            <div class="mt-2 text-center">
+                                <span class="inline-block bg-emerald-500 text-white font-comic font-bold text-sm px-4 py-1 rounded-full shadow-xs">
+                                    BAJET ASAL: RM80.00
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Collaborative Group Roles Section ("Peranan Ahli Kumpulan") -->
+            <div class="bg-white border-4 border-purple-200 rounded-3xl p-5 sm:p-6 shadow-md">
+                <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
+                    <div>
+                        <h3 class="text-xl sm:text-2xl font-bold text-purple-900 flex items-center gap-2">
+                            <span>🤝</span> Peranan Ahli Kumpulan (4 Murid)
+                        </h3>
+                        <p class="text-xs sm:text-sm text-slate-600">
+                            Setiap ahli mempunyai tugas penting! Bincang dan tulis nama ahli kumpulan kamu di bawah.
+                        </p>
+                    </div>
+                    <span class="px-3 py-1 bg-purple-100 text-purple-800 font-bold text-xs rounded-full border border-purple-300">
+                        Kerjasama Sepasukan
+                    </span>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- Role 1 -->
+                    <div class="bg-amber-50 border-2 border-amber-300 rounded-2xl p-4 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-2xl">👑</span>
+                                <div>
+                                    <span class="text-[10px] font-bold uppercase text-amber-700 block">Peranan 1</span>
+                                    <h4 class="font-comic font-bold text-base text-amber-950">KETUA KUMPULAN</h4>
+                                </div>
+                            </div>
+                            <ul class="text-xs text-slate-700 space-y-1 mb-3 list-disc list-inside">
+                                <li>Menyelaras perbincangan kumpulan.</li>
+                                <li>Menggalakkan setiap ahli memberi idea.</li>
+                                <li>Membimbing keputusan pembelian.</li>
+                                <li>Menyemak pilihan akhir kumpulan.</li>
+                            </ul>
+                        </div>
+                        <input type="text" id="role-name-0" oninput="updateRoleName(0, this.value)" placeholder="Nama Ketua Kumpulan..." class="w-full bg-white border border-amber-300 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-800 focus:outline-none focus:border-amber-500">
+                    </div>
+
+                    <!-- Role 2 -->
+                    <div class="bg-sky-50 border-2 border-sky-300 rounded-2xl p-4 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-2xl">🛍️</span>
+                                <div>
+                                    <span class="text-[10px] font-bold uppercase text-sky-700 block">Peranan 2</span>
+                                    <h4 class="font-comic font-bold text-base text-sky-950">PEMILIH BARANG</h4>
+                                </div>
+                            </div>
+                            <ul class="text-xs text-slate-700 space-y-1 mb-3 list-disc list-inside">
+                                <li>Meneroka katalog kedai alat tulis.</li>
+                                <li>Mencadangkan barang yang sesuai.</li>
+                                <li>Memilih barang mengikut keperluan.</li>
+                                <li>Memastikan barang dalam bajet.</li>
+                            </ul>
+                        </div>
+                        <input type="text" id="role-name-1" oninput="updateRoleName(1, this.value)" placeholder="Nama Pemilih Barang..." class="w-full bg-white border border-sky-300 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-800 focus:outline-none focus:border-sky-500">
+                    </div>
+
+                    <!-- Role 3 -->
+                    <div class="bg-emerald-50 border-2 border-emerald-300 rounded-2xl p-4 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-2xl">🧮</span>
+                                <div>
+                                    <span class="text-[10px] font-bold uppercase text-emerald-700 block">Peranan 3</span>
+                                    <h4 class="font-comic font-bold text-base text-emerald-950">PENGIRA</h4>
+                                </div>
+                            </div>
+                            <ul class="text-xs text-slate-700 space-y-1 mb-3 list-disc list-inside">
+                                <li>Mengira harga setiap barang dipilih.</li>
+                                <li>Mengira jumlah keseluruhan belian.</li>
+                                <li>Menyemak baki bajet kumpulan.</li>
+                                <li>Mengesahkan ketepatan pengiraan.</li>
+                            </ul>
+                        </div>
+                        <input type="text" id="role-name-2" oninput="updateRoleName(2, this.value)" placeholder="Nama Pengira..." class="w-full bg-white border border-emerald-300 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-800 focus:outline-none focus:border-emerald-500">
+                    </div>
+
+                    <!-- Role 4 -->
+                    <div class="bg-pink-50 border-2 border-pink-300 rounded-2xl p-4 flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-2xl">💵</span>
+                                <div>
+                                    <span class="text-[10px] font-bold uppercase text-pink-700 block">Peranan 4</span>
+                                    <h4 class="font-comic font-bold text-base text-pink-950">JURUWANG</h4>
+                                </div>
+                            </div>
+                            <ul class="text-xs text-slate-700 space-y-1 mb-3 list-disc list-inside">
+                                <li>Memilih wang kertas & syiling sesuai.</li>
+                                <li>Mengira jumlah wang bayaran.</li>
+                                <li>Menentukan baki wang yang betul.</li>
+                                <li>Mengesahkan pembayaran akhir.</li>
+                            </ul>
+                        </div>
+                        <input type="text" id="role-name-3" oninput="updateRoleName(3, this.value)" placeholder="Nama Juruwang..." class="w-full bg-white border border-pink-300 rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-800 focus:outline-none focus:border-pink-500">
+                    </div>
+                </div>
+
+                <!-- Start Mission CTA -->
+                <div class="mt-6 flex justify-center">
+                    <button onclick="goToStage(2)" class="btn-game bg-emerald-500 hover:bg-emerald-400 text-white font-comic font-bold text-lg sm:text-xl px-8 py-4 rounded-3xl border-2 border-emerald-700 flex items-center gap-3">
+                        <span>🚀</span>
+                        <span>MULA MISI MEMBELI-BELAH!</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===============================================================
+             STAGE 2: JOM PILIH BARANG! (3-PANEL STATIONERY SHOP)
+        ================================================================ -->
+        <div id="stage-2" class="stage-view hidden animate-pop-in">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-start">
+
+                <!-- LEFT PANEL: PRODUCT CATEGORIES & ILLUSTRATED SHELVES (2 cols on lg) -->
+                <aside class="lg:col-span-2 bg-amber-50 border-3 border-amber-300 rounded-3xl p-3.5 shadow-sm">
+                    <div class="flex items-center gap-2 mb-3 pb-2 border-b-2 border-amber-200">
+                        <span class="text-xl">🗂️</span>
+                        <h2 class="font-comic font-bold text-base text-amber-900">Rak Kategori</h2>
+                    </div>
+                    <div id="category-list" class="flex lg:flex-col gap-2 overflow-x-auto pb-1 lg:pb-0">
+                        <!-- Rendered dynamically -->
+                    </div>
+
+                    <!-- Decorative Mini Shelf Card -->
+                    <div class="hidden lg:block mt-5 bg-white border-2 border-amber-200 rounded-2xl p-3 text-center">
+                        <div class="text-3xl mb-1">🎒✏️📏</div>
+                        <p class="text-xs font-bold text-amber-900">Tip Bijak:</p>
+                        <p class="text-[11px] text-slate-600 mt-1">
+                            Utamakan barang <strong>keperluan</strong> sekolah sebelum membeli barang kehendak!
+                        </p>
+                    </div>
+                </aside>
+
+                <!-- CENTRE PANEL: MAIN PRODUCT CATALOGUE (6 cols on lg) -->
+                <section class="lg:col-span-6 bg-white border-3 border-sky-200 rounded-3xl p-4 shadow-sm">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-3 pb-2 border-b-2 border-sky-100">
+                        <div>
+                            <h2 class="font-comic font-bold text-lg sm:text-xl text-sky-900 flex items-center gap-2">
+                                <span>📚</span> Katalog Kedai Alat Tulis
+                            </h2>
+                            <p class="text-xs text-slate-500">Klik <strong>"+ Tambah"</strong> untuk memasukkan barang ke dalam bakul.</p>
+                        </div>
+                        <span id="catalog-count-badge" class="px-3 py-1 bg-sky-100 text-sky-800 text-xs font-bold rounded-full">
+                            11 Barang
+                        </span>
+                    </div>
+
+                    <!-- Product Grid -->
+                    <div id="product-grid" class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 max-h-[640px] overflow-y-auto pr-1">
+                        <!-- Rendered dynamically -->
+                    </div>
+                </section>
+
+                <!-- RIGHT PANEL: SHOPPING CART & LIVE BUDGET METER (4 cols on lg) -->
+                <aside class="lg:col-span-4 bg-gradient-to-b from-pink-50 to-amber-50 border-3 border-pink-300 rounded-3xl p-4 shadow-sm sticky top-28">
+                    <div class="flex items-center justify-between mb-3 pb-2 border-b-2 border-pink-200">
+                        <h2 class="font-comic font-bold text-lg sm:text-xl text-pink-900 flex items-center gap-2">
+                            <span>🛒</span> Bakul Belian
+                        </h2>
+                        <button onclick="clearCart()" class="text-xs font-bold text-rose-600 hover:text-rose-800 bg-rose-100 px-2.5 py-1 rounded-xl border border-rose-200">
+                            Kosongkan
+                        </button>
+                    </div>
+
+                    <!-- Budget Progress Visual Meter -->
+                    <div class="bg-white border-2 border-amber-300 rounded-2xl p-3 mb-3 shadow-xs">
+                        <div class="flex justify-between items-center text-xs font-bold mb-1">
+                            <span class="text-slate-600">BAJET ASAL: <strong class="text-slate-900">RM80.00</strong></span>
+                            <span id="budget-percent-text" class="text-emerald-700">0% Digunakan</span>
+                        </div>
+                        <div class="w-full h-4 bg-slate-200 rounded-full overflow-hidden p-0.5 border border-slate-300">
+                            <div id="budget-progress-bar" class="h-full bg-emerald-500 rounded-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 mt-2.5 pt-2 border-t border-slate-100 text-center">
+                            <div class="bg-pink-50 rounded-xl p-1.5">
+                                <span class="block text-[10px] font-bold text-pink-700 uppercase">Jumlah Belian</span>
+                                <span id="cart-total-display" class="font-comic font-bold text-base sm:text-lg text-pink-600">RM0.00</span>
+                            </div>
+                            <div class="bg-emerald-50 rounded-xl p-1.5">
+                                <span class="block text-[10px] font-bold text-emerald-700 uppercase">Baki Bajet</span>
+                                <span id="cart-remaining-display" class="font-comic font-bold text-base sm:text-lg text-emerald-600">RM80.00</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Budget Exceeded Warning Banner -->
+                    <div id="budget-warning-box" class="hidden mb-3 bg-rose-100 border-2 border-rose-400 text-rose-900 rounded-2xl p-3 text-xs font-bold flex items-start gap-2 animate-bounce">
+                        <span class="text-lg">⚠️</span>
+                        <div>
+                            <p>Oops! Bajet kamu tidak mencukupi (Melebihi RM80.00).</p>
+                            <p class="font-normal mt-0.5">Sila kurangkan kuantiti atau pilih semula barang.</p>
+                        </div>
+                    </div>
+
+                    <!-- Cart Items List -->
+                    <div id="cart-items-container" class="space-y-2 max-h-[300px] overflow-y-auto pr-1 mb-4">
+                        <!-- Rendered dynamically -->
+                    </div>
+
+                    <!-- Proceed to Payment Button -->
+                    <div class="space-y-2">
+                        <button id="btn-to-payment" onclick="goToStage(3)" disabled class="btn-game w-full bg-emerald-500 hover:bg-emerald-400 text-white font-comic font-bold text-base py-3.5 px-4 rounded-2xl border-2 border-emerald-700 flex items-center justify-center gap-2">
+                            <span>💳</span>
+                            <span>TERUSKAN KE PEMBAYARAN</span>
+                        </button>
+                        <button onclick="goToStage(1)" class="w-full text-xs font-bold text-slate-600 hover:text-slate-900 py-1.5">
+                            ← Kembali ke Peranan Kumpulan
+                        </button>
+                    </div>
+                </aside>
+
+            </div>
+        </div>
+
+        <!-- ===============================================================
+             STAGE 3: MASA UNTUK MEMBAYAR! (MALAYSIAN CURRENCY WALLET)
+        ================================================================ -->
+        <div id="stage-3" class="stage-view hidden animate-pop-in">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+
+                <!-- Left: Currency Selection Wallet (8 cols) -->
+                <div class="lg:col-span-8 bg-white border-4 border-emerald-300 rounded-3xl p-4 sm:p-6 shadow-md">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-4 pb-3 border-b-2 border-emerald-100">
+                        <div>
+                            <h2 class="font-comic font-bold text-xl sm:text-2xl text-emerald-900 flex items-center gap-2">
+                                <span>💵</span> Dompet Wang Malaysia Kumpulan
+                            </h2>
+                            <p class="text-xs sm:text-sm text-slate-600">
+                                Klik pada wang kertas atau syiling di bawah untuk menambah ke ruang bayaran.
+                            </p>
+                        </div>
+                        <button onclick="clearSelectedPayment()" class="bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-xs px-3 py-2 rounded-xl border border-amber-300">
+                            🔄 Kosongkan Pilihan Wang
+                        </button>
+                    </div>
+
+                    <!-- Banknotes Section -->
+                    <div class="mb-5">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Wang Kertas Malaysia</h3>
+                        <div id="banknotes-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            <!-- Rendered dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Coins Section -->
+                    <div class="mb-5">
+                        <h3 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">Wang Syiling Malaysia</h3>
+                        <div id="coins-grid" class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                            <!-- Rendered dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Selected Payment Tray -->
+                    <div class="bg-sky-50 border-2 border-sky-300 rounded-2xl p-4">
+                        <div class="flex items-center justify-between mb-2">
+                            <h3 class="font-comic font-bold text-base text-sky-950 flex items-center gap-2">
+                                <span>🤲</span> Wang Yang Dipilih Untuk Membayar:
+                            </h3>
+                            <span class="text-xs font-bold text-sky-700">(Klik wang di bawah untuk membuang)</span>
+                        </div>
+                        <div id="selected-payment-tray" class="min-h-[64px] flex flex-wrap gap-2 items-center bg-white border border-sky-200 rounded-xl p-2.5">
+                            <!-- Rendered dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right: Payment Summary & Validation (4 cols) -->
+                <div class="lg:col-span-4 bg-amber-50 border-4 border-amber-300 rounded-3xl p-4 sm:p-5 shadow-md space-y-4">
+                    <h2 class="font-comic font-bold text-xl text-amber-950 flex items-center gap-2 border-b-2 border-amber-200 pb-2">
+                        <span>🧾</span> Ringkasan Bayaran
+                    </h2>
+
+                    <!-- Mini Item List -->
+                    <div class="bg-white rounded-2xl p-3 border border-amber-200 max-h-40 overflow-y-auto text-xs space-y-1" id="payment-mini-cart">
+                        <!-- Rendered dynamically -->
+                    </div>
+
+                    <!-- Calculations Box -->
+                    <div class="bg-white rounded-2xl p-4 border-2 border-amber-300 space-y-2.5">
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="font-semibold text-slate-600">Bajet Asal:</span>
+                            <span class="font-comic font-bold text-slate-800">RM80.00</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="font-semibold text-slate-600">Jumlah Perlu Dibayar:</span>
+                            <span id="pay-stage-total" class="font-comic font-bold text-lg text-pink-600">RM0.00</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm pt-2 border-t border-slate-200">
+                            <span class="font-bold text-sky-900">Jumlah Wang Dipilih:</span>
+                            <span id="pay-stage-selected" class="font-comic font-bold text-xl text-sky-600">RM0.00</span>
+                        </div>
+                        <div id="pay-status-banner" class="p-2.5 rounded-xl text-xs font-bold text-center bg-amber-100 text-amber-900">
+                            Sila pilih wang mencukupi untuk membayar.
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <button id="btn-confirm-payment" onclick="processPayment()" disabled class="btn-game w-full bg-emerald-500 hover:bg-emerald-400 text-white font-comic font-bold text-base py-3.5 px-4 rounded-2xl border-2 border-emerald-700 flex items-center justify-center gap-2">
+                        <span>✅</span>
+                        <span>SAHKAN PEMBAYARAN</span>
+                    </button>
+
+                    <button onclick="goToStage(2)" class="w-full bg-white hover:bg-slate-100 text-slate-700 font-bold text-xs py-2.5 px-4 rounded-xl border border-slate-300">
+                        ← Ubah Pilihan Barang di Kedai
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ===============================================================
+             STAGE 4: KIRA BAKI KAMU! (CHANGE CALCULATION & VERIFICATION)
+        ================================================================ -->
+        <div id="stage-4" class="stage-view hidden animate-pop-in">
+            <div class="max-w-4xl mx-auto bg-white border-4 border-sky-300 rounded-3xl p-5 sm:p-8 shadow-md space-y-6">
+                <div class="text-center space-y-2">
+                    <span class="inline-block bg-sky-100 text-sky-800 font-bold text-xs px-3.5 py-1 rounded-full border border-sky-300">
+                        Tahap 4 • Semakan Matematik Juruwang & Pengira
+                    </span>
+                    <h2 class="font-comic font-bold text-2xl sm:text-3xl text-sky-950">
+                        Jom Kira Baki Wang Kamu! 🧮
+                    </h2>
+                    <p class="text-sm text-slate-600">
+                        Bincang bersama ahli kumpulan untuk menentukan baki wang yang betul selepas membuat pembayaran.
+                    </p>
+                </div>
+
+                <!-- Formula Visual Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-center bg-amber-50 border-2 border-amber-300 rounded-3xl p-4 sm:p-6">
+                    <div class="bg-white rounded-2xl p-4 text-center border-2 border-sky-200 shadow-xs">
+                        <span class="text-xs font-bold uppercase text-sky-700 block">Jumlah Wang Dibayar</span>
+                        <span id="calc-paid-amount" class="font-comic font-bold text-2xl sm:text-3xl text-sky-600 mt-1 block">RM0.00</span>
+                    </div>
+
+                    <div class="text-center">
+                        <div class="inline-flex items-center justify-center w-10 h-10 rounded-full bg-pink-500 text-white font-bold text-xl mb-1">−</div>
+                        <div class="bg-white rounded-2xl p-4 text-center border-2 border-pink-200 shadow-xs">
+                            <span class="text-xs font-bold uppercase text-pink-700 block">Jumlah Belian</span>
+                            <span id="calc-purchase-amount" class="font-comic font-bold text-2xl sm:text-3xl text-pink-600 mt-1 block">RM0.00</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-emerald-50 rounded-2xl p-4 text-center border-2 border-emerald-400 shadow-xs">
+                        <span class="text-xs font-bold uppercase text-emerald-800 block">Berapakah Baki Wang?</span>
+                        <div class="mt-2 flex items-center justify-center gap-1">
+                            <span class="font-comic font-bold text-xl text-emerald-800">RM</span>
+                            <input type="number" step="0.05" min="0" id="pupil-change-input" placeholder="0.00" class="w-28 text-center font-comic font-bold text-2xl bg-white border-2 border-emerald-500 rounded-xl py-1 px-2 text-emerald-900 focus:outline-none">
+                        </div>
+                        <button onclick="checkPupilChangeAnswer()" class="btn-game mt-3 w-full bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-xs py-2 px-3 rounded-xl border border-emerald-700">
+                            Semak Jawapan Kumpulan
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Interactive Explanation & Returned Denominations Reveal -->
+                <div id="change-verification-result" class="hidden space-y-5 animate-pop-in">
+                    <div id="change-feedback-alert" class="p-4 rounded-2xl border-2 font-medium text-sm">
+                        <!-- Dynamic feedback -->
+                    </div>
+
+                    <!-- Returned Denominations Breakdown -->
+                    <div class="bg-purple-50 border-2 border-purple-300 rounded-2xl p-4">
+                        <h3 class="font-comic font-bold text-base text-purple-950 mb-2 flex items-center gap-2">
+                            <span>🪙</span> Pecahan Wang Baki Yang Dikembalikan Peniaga:
+                        </h3>
+                        <div id="returned-denominations-list" class="flex flex-wrap gap-2.5">
+                            <!-- Rendered dynamically -->
+                        </div>
+                        <p class="text-xs text-purple-800 mt-2">
+                            * Wang baki ini telah dikembalikan ke dalam stok dompet kumpulan.
+                        </p>
+                    </div>
+
+                    <!-- Clear Distinction of ALL 5 Financial Values -->
+                    <div class="bg-slate-50 border-2 border-slate-300 rounded-2xl p-4">
+                        <h3 class="font-comic font-bold text-base text-slate-800 mb-3 flex items-center gap-2">
+                            <span>📊</span> Semakan 5 Nilai Kewangan Penting:
+                        </h3>
+                        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5 text-center">
+                            <div class="bg-white p-2.5 rounded-xl border border-slate-200">
+                                <span class="block text-[10px] font-bold text-slate-500 uppercase">1. Jumlah Belian</span>
+                                <span id="val5-purchase" class="font-comic font-bold text-base text-pink-600">RM0.00</span>
+                            </div>
+                            <div class="bg-white p-2.5 rounded-xl border border-slate-200">
+                                <span class="block text-[10px] font-bold text-slate-500 uppercase">2. Jumlah Bayaran</span>
+                                <span id="val5-payment" class="font-comic font-bold text-base text-sky-600">RM0.00</span>
+                            </div>
+                            <div class="bg-white p-2.5 rounded-xl border border-slate-200">
+                                <span class="block text-[10px] font-bold text-slate-500 uppercase">3. Baki Diterima</span>
+                                <span id="val5-change" class="font-comic font-bold text-base text-amber-600">RM0.00</span>
+                            </div>
+                            <div class="bg-white p-2.5 rounded-xl border border-slate-200">
+                                <span class="block text-[10px] font-bold text-slate-500 uppercase">4. Perbelanjaan Sebenar</span>
+                                <span id="val5-actual" class="font-comic font-bold text-base text-purple-600">RM0.00</span>
+                            </div>
+                            <div class="bg-emerald-50 p-2.5 rounded-xl border-2 border-emerald-300 col-span-2 sm:col-span-1">
+                                <span class="block text-[10px] font-bold text-emerald-800 uppercase">5. Baki Bajet (RM80)</span>
+                                <span id="val5-rembudget" class="font-comic font-bold text-base text-emerald-700">RM0.00</span>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-600 mt-2.5">
+                            <strong>Ingat:</strong> Baki Bajet = Bajet Asal (RM80.00) − Perbelanjaan Sebenar. Baki wang bayaran ialah wang lebihan yang dipulangkan oleh juruwang.
+                        </p>
+                    </div>
+
+                    <div class="flex justify-center pt-2">
+                        <button onclick="goToStage(5)" class="btn-game bg-amber-400 hover:bg-amber-300 text-amber-950 font-comic font-bold text-lg px-8 py-3.5 rounded-3xl border-2 border-amber-600 flex items-center gap-2">
+                            <span>🏆</span>
+                            <span>LIHAT RESIT & TAMATKAN MISI</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===============================================================
+             STAGE 5: MISI SELESAI! (RECEIPT & MEANINGFUL REFLECTION)
+        ================================================================ -->
+        <div id="stage-5" class="stage-view hidden animate-pop-in space-y-6">
+            <!-- Celebration Header -->
+            <div class="bg-gradient-to-r from-emerald-400 via-teal-400 to-sky-400 text-white rounded-3xl p-5 sm:p-7 text-center shadow-md border-4 border-white">
+                <div class="text-4xl sm:text-5xl mb-2">🎉🏆🎉</div>
+                <h2 class="font-comic font-bold text-xl sm:text-3xl tracking-wide drop-shadow-xs">
+                    TAHNIAH! KUMPULAN KAMU TELAH MENYELESAIKAN MISI BIJAK BERBELANJA!
+                </h2>
+                <p id="celebration-group-subtitle" class="text-sm sm:text-base font-medium text-emerald-50 mt-1">
+                    Kumpulan 1 (Bijak) • Kelas 2 Bijak
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+                <!-- Left: Official Printable-Style Receipt (6 cols) -->
+                <div class="lg:col-span-6 bg-white border-2 border-slate-300 rounded-3xl p-5 sm:p-6 shadow-md relative">
+                    <div class="text-center border-b-2 border-dashed border-slate-300 pb-4 mb-4">
+                        <div class="text-3xl mb-1">🏪</div>
+                        <h3 class="font-comic font-bold text-xl text-slate-900">KEDAI ALAT TULIS CERIA</h3>
+                        <p class="text-xs text-slate-500">Resit Rasmi Pembelian • Kelas 2 Bijak</p>
+                        <p id="receipt-group-info" class="text-xs font-bold text-sky-700 mt-1">Kumpulan 1 (Bijak)</p>
+                    </div>
+
+                    <!-- Receipt Line Items Table -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs sm:text-sm text-left mb-4">
+                            <thead>
+                                <tr class="border-b border-slate-300 text-slate-500">
+                                    <th class="py-1.5">Barang</th>
+                                    <th class="py-1.5 text-center">Kuantiti</th>
+                                    <th class="py-1.5 text-right">Harga Seunit</th>
+                                    <th class="py-1.5 text-right">Jumlah</th>
+                                </tr>
+                            </thead>
+                            <tbody id="receipt-items-tbody" class="divide-y divide-slate-100">
+                                <!-- Rendered dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Receipt Totals -->
+                    <div class="border-t-2 border-dashed border-slate-300 pt-3 space-y-1.5 text-xs sm:text-sm">
+                        <div class="flex justify-between">
+                            <span class="text-slate-600">Bajet Asal Kumpulan:</span>
+                            <span class="font-bold text-slate-800">RM80.00</span>
+                        </div>
+                        <div class="flex justify-between text-base font-bold text-pink-600">
+                            <span>Jumlah Pembelian:</span>
+                            <span id="receipt-total-purchase">RM0.00</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-600">Jumlah Wang Dibayar:</span>
+                            <span id="receipt-amount-paid" class="font-bold text-sky-700">RM0.00</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-600">Baki Wang Diterima:</span>
+                            <span id="receipt-change-received" class="font-bold text-amber-600">RM0.00</span>
+                        </div>
+                        <div class="flex justify-between pt-2 border-t border-slate-200">
+                            <span class="text-slate-600">Perbelanjaan Sebenar:</span>
+                            <span id="receipt-actual-spending" class="font-bold text-purple-700">RM0.00</span>
+                        </div>
+                        <div class="flex justify-between bg-emerald-50 p-2.5 rounded-xl border border-emerald-300 text-emerald-900 font-bold text-base">
+                            <span>Baki Bajet Tersimpan:</span>
+                            <span id="receipt-remaining-budget">RM0.00</span>
+                        </div>
+                    </div>
+
+                    <div class="mt-4 pt-3 border-t border-dashed border-slate-300 text-center text-xs text-slate-500">
+                        Terima kasih kerana berbelanja dengan bijak! 🌟
+                    </div>
+
+                    <!-- Receipt Action Buttons -->
+                    <div class="mt-5 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        <button onclick="startNewMissionSameGroup()" class="btn-game bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-xs sm:text-sm py-3 px-4 rounded-2xl border-2 border-emerald-700">
+                            🔄 Mula Misi Baharu
+                        </button>
+                        <button onclick="goToStage(2)" class="btn-game bg-sky-100 hover:bg-sky-200 text-sky-900 font-bold text-xs sm:text-sm py-3 px-4 rounded-2xl border-2 border-sky-300">
+                            🏪 Kembali ke Kedai
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Right: Reflection & Meaningful Learning (6 cols) -->
+                <div class="lg:col-span-6 bg-amber-50 border-4 border-amber-300 rounded-3xl p-5 sm:p-6 shadow-md space-y-4">
+                    <div class="flex items-center gap-2">
+                        <span class="text-2xl">💭</span>
+                        <div>
+                            <h3 class="font-comic font-bold text-xl text-amber-950">Refleksi & Pembelajaran Bermakna</h3>
+                            <p class="text-xs text-amber-800">Bincangkan soalan-soalan berikut bersama ahli kumpulan kamu.</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="bg-white p-3.5 rounded-2xl border border-amber-200">
+                            <p class="font-bold text-xs sm:text-sm text-slate-800 mb-1.5">
+                                1. Apakah perkara baharu yang kamu pelajari hari ini?
+                            </p>
+                            <textarea rows="2" placeholder="Tulis jawapan atau idea kumpulan..." class="w-full text-xs bg-amber-50/60 border border-amber-200 rounded-xl p-2 focus:outline-none focus:border-amber-400"></textarea>
+                        </div>
+
+                        <div class="bg-white p-3.5 rounded-2xl border border-amber-200">
+                            <p class="font-bold text-xs sm:text-sm text-slate-800 mb-1.5">
+                                2. Mengapakah kita perlu merancang perbelanjaan sebelum membeli barang?
+                            </p>
+                            <textarea rows="2" placeholder="Tulis jawapan atau idea kumpulan..." class="w-full text-xs bg-amber-50/60 border border-amber-200 rounded-xl p-2 focus:outline-none focus:border-amber-400"></textarea>
+                        </div>
+
+                        <div class="bg-white p-3.5 rounded-2xl border border-amber-200">
+                            <p class="font-bold text-xs sm:text-sm text-slate-800 mb-1.5">
+                                3. Bagaimanakah kamu menentukan baki wang selepas membuat pembayaran?
+                            </p>
+                            <textarea rows="2" placeholder="Tulis jawapan atau idea kumpulan..." class="w-full text-xs bg-amber-50/60 border border-amber-200 rounded-xl p-2 focus:outline-none focus:border-amber-400"></textarea>
+                        </div>
+
+                        <div class="bg-white p-3.5 rounded-2xl border border-amber-200">
+                            <p class="font-bold text-xs sm:text-sm text-slate-800 mb-1.5">
+                                4. Mengapakah penting untuk membezakan antara keperluan dan kehendak?
+                            </p>
+                            <textarea rows="2" placeholder="Tulis jawapan atau idea kumpulan..." class="w-full text-xs bg-amber-50/60 border border-amber-200 rounded-xl p-2 focus:outline-none focus:border-amber-400"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ===================================================================
+         BOTTOM SECTION: GUIDED GROUP DISCUSSION PANEL ("JOM BINCANG BERSAMA!")
+    ==================================================================== -->
+    <section class="max-w-7xl w-full mx-auto px-3 sm:px-6 pb-8 pt-2">
+        <div class="bg-white border-4 border-indigo-200 rounded-3xl p-4 sm:p-5 shadow-md">
+            <div class="flex flex-wrap items-center justify-between gap-2 pb-3 border-b-2 border-indigo-100">
+                <div class="flex items-center gap-2.5">
+                    <span class="text-2xl">💬</span>
+                    <div>
+                        <h2 class="font-comic font-bold text-lg sm:text-xl text-indigo-950">
+                            Jom Bincang Bersama!
+                        </h2>
+                        <p class="text-xs text-slate-500">
+                            Ruang perbincangan matematik kumpulan tempatan (Pilih fasa soalan panduan di sebelah).
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Phase Selector Tabs -->
+                <div class="flex flex-wrap gap-1.5" id="discussion-phase-tabs">
+                    <button onclick="setDiscussionPhase(1)" data-phase="1" class="phase-tab px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 text-white">
+                        Fasa 1: Pemilihan Barang
+                    </button>
+                    <button onclick="setDiscussionPhase(2)" data-phase="2" class="phase-tab px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-50 text-indigo-800 hover:bg-indigo-100">
+                        Fasa 2: Pengiraan Jumlah
+                    </button>
+                    <button onclick="setDiscussionPhase(3)" data-phase="3" class="phase-tab px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-50 text-indigo-800 hover:bg-indigo-100">
+                        Fasa 3: Pembayaran
+                    </button>
+                    <button onclick="setDiscussionPhase(4)" data-phase="4" class="phase-tab px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-50 text-indigo-800 hover:bg-indigo-100">
+                        Fasa 4: Pengiraan Baki
+                    </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 mt-4">
+                <!-- Guided Prompts List (6 cols) -->
+                <div class="lg:col-span-6 bg-indigo-50/70 border-2 border-indigo-200 rounded-2xl p-3.5">
+                    <h3 id="discussion-phase-title" class="font-comic font-bold text-sm text-indigo-900 mb-2">
+                        FASA 1: PEMILIHAN BARANG
+                    </h3>
+                    <div id="discussion-prompts-list" class="space-y-2">
+                        <!-- Rendered dynamically -->
+                    </div>
+                </div>
+
+                <!-- Local Group Chat Log & Input (6 cols) -->
+                <div class="lg:col-span-6 flex flex-col justify-between bg-slate-50 border-2 border-slate-200 rounded-2xl p-3.5">
+                    <div>
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs font-bold text-slate-600">Catatan Perbincangan Kumpulan:</span>
+                            <button onclick="clearChatHistory()" class="text-[11px] font-bold text-rose-600 hover:underline">
+                                🗑️ Padam Catatan
+                            </button>
+                        </div>
+
+                        <!-- Conversation Display -->
+                        <div id="chat-messages-box" class="bg-white border border-slate-200 rounded-xl p-3 h-40 overflow-y-auto space-y-2 mb-2.5 text-xs">
+                            <!-- Rendered dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Emoji Quick Reactions + Text Input -->
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            <span class="text-[11px] font-bold text-slate-500">Reaksi Pantas:</span>
+                            <button onclick="sendQuickReaction('👍 Setuju!')" class="px-2 py-1 bg-white hover:bg-amber-50 border border-slate-200 rounded-lg text-xs">👍 Setuju</button>
+                            <button onclick="sendQuickReaction('🧮 Jom kira sama-sama!')" class="px-2 py-1 bg-white hover:bg-amber-50 border border-slate-200 rounded-lg text-xs">🧮 Jom kira</button>
+                            <button onclick="sendQuickReaction('💡 Idea yang bagus!')" class="px-2 py-1 bg-white hover:bg-amber-50 border border-slate-200 rounded-lg text-xs">💡 Idea bagus</button>
+                            <button onclick="sendQuickReaction('✅ Semakan betul!')" class="px-2 py-1 bg-white hover:bg-amber-50 border border-slate-200 rounded-lg text-xs">✅ Betul</button>
+                        </div>
+
+                        <form onsubmit="handleChatSubmit(event)" class="flex gap-2">
+                            <select id="chat-sender-role" class="bg-white border border-slate-300 rounded-xl px-2 py-2 text-xs font-bold text-slate-700 shrink-0">
+                                <option value="👑 Ketua">👑 Ketua</option>
+                                <option value="🛍️ Pemilih">🛍️ Pemilih</option>
+                                <option value="🧮 Pengira">🧮 Pengira</option>
+                                <option value="💵 Juruwang">💵 Juruwang</option>
+                            </select>
+                            <input type="text" id="chat-text-input" placeholder="Tulis pendapat atau jawapan kumpulan..." class="flex-1 bg-white border border-slate-300 rounded-xl px-3 py-2 text-xs focus:outline-none focus:border-indigo-500">
+                            <button type="submit" class="btn-game bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs px-4 py-2 rounded-xl">
+                                Hantar
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===================================================================
+         CUSTOM MODAL DIALOG (NEVER USES NATIVE alert() OR confirm())
+    ==================================================================== -->
+    <div id="custom-modal-backdrop" class="fixed inset-0 bg-slate-900/50 backdrop-blur-xs z-50 hidden items-center justify-center p-4">
+        <div class="bg-white border-4 border-amber-400 rounded-3xl max-w-md w-full p-6 shadow-xl animate-pop-in text-center space-y-4">
+            <div id="modal-icon" class="text-4xl">⚠️</div>
+            <h3 id="modal-title" class="font-comic font-bold text-xl text-slate-900">Pengesahan</h3>
+            <p id="modal-body" class="text-sm text-slate-600 leading-relaxed">Adakah kamu pasti?</p>
+            <div id="modal-actions" class="flex items-center justify-center gap-3 pt-2">
+                <!-- Rendered dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================================================
+         COMPLETE APPLICATION JAVASCRIPT (INTEGER SEN ARITHMETIC)
+    ==================================================================== -->
+    <script>
+        /**
+         * ====================================================================
+         * 1. MASTER DATA DEFINITIONS (EXACT 11 PRODUCTS & DENOMINATION STOCK)
+         * ====================================================================
+         */
+        const ORIGINAL_BUDGET_SEN = 8000; // RM80.00 in integer sen
+
+        // Exact 11 Products specified in requirements (Prices in integer sen)
+        const PRODUCTS = [
+            {
+                id: 1,
+                name: "Buku Latihan",
+                priceSen: 800,
+                category: "Buku dan Bahan Bacaan",
+                needType: "Keperluan",
+                bg: "bg-sky-100",
+                svg: `<svg viewBox="0 0 80 80" class="w-16 h-16"><rect x="18" y="10" width="44" height="60" rx="5" fill="#38BDF8" stroke="#0369A1" stroke-width="3"/><rect x="24" y="10" width="6" height="60" fill="#0284C7"/><rect x="36" y="22" width="20" height="12" rx="2" fill="#FFF"/><line x1="39" y1="26" x2="53" y2="26" stroke="#94A3B8" stroke-width="2"/><line x1="39" y1="30" x2="49" y2="30" stroke="#94A3B8" stroke-width="2"/></svg>`
+            },
+            {
+                id: 2,
+                name: "Pensel",
+                priceSen: 200,
+                category: "Alat Tulis",
+                needType: "Keperluan",
+                bg: "bg-amber-100",
+                svg: `<svg viewBox="0 0 80 80" class="w-16 h-16"><g transform="rotate(45 40 40)"><rect x="34" y="14" width="12" height="44" fill="#FBBF24" stroke="#B45309" stroke-width="2.5"/><rect x="34" y="10" width="12" height="7" rx="2" fill="#F472B6" stroke="#9D174D" stroke-width="2"/><polygon points="34,58 46,58 40,70" fill="#FDE68A" stroke="#B45309" stroke-width="2"/><polygon points="38,66 42,66 40,70" fill="#1E293B"/></g></svg>`
+            },
+            {
+                id: 3,
+                name: "Pemadam",
+                priceSen: 100,
+                category: "Alat Tulis",
+                needType: "Keperluan",
+                bg: "bg-pink-100",
+                svg: `<svg viewBox="0 0 80 80" class="w-16 h-16"><g transform="rotate(-20 40 40)"><rect x="18" y="28" width="44" height="24" rx="5" fill="#F472B6" stroke="#9D174D" stroke-width="3"/><rect x="34" y="28" width="28" height="24" rx="3" fill="#38BDF8" stroke="#0369A1" stroke-width="3"/></g></svg>`
+            },
+            {
+                id: 4,
+                name: "Pembaris",
+                priceSen: 300,
+                category: "Alat Tulis",
+                needType: "Keperluan",
+                bg: "bg-yellow-100",
+                svg: `<svg viewBox="0 0 80 80" class="w-16 h-16"><g transform="rotate(-35 40 40)"><rect x="10" y="30" width="60" height="20" rx="3" fill="#FDE047" stroke="#A16207" stroke-width="3"/><line x1="20" y1="30" x2="20" y2="38" stroke="#A16207" stroke-width="2"/><line x1="30" y1="30" x2="30" y2="41" stroke="#A16207" stroke-width="2"/><line x1="40" y1="30" x2="40" y2="38" stroke="#A16207" stroke-width="2"/><line x1="50" y1="30" x2="50" y2="41" stroke="#A16207" stroke-width="2"/><line x1="60" y1="30" x2="60" y2="38" stroke="#A16207" stroke-width="2"/></g></svg>`
+            },
+            {
+                id: 5,
+                name: "Kotak Pensel",
+                priceSen: 1200,
+                category: "Peralatan Sekolah",
+                needType: "Keperluan",
+                bg: "bg-purple-100",
+                svg: `<svg viewBox="0 0 80 80" class="w-16 h-16"><rect x="14" y="26" width="52" height="30" rx="10" fill="#A855F7" stroke="#6B21A8" stroke-width="3"/><line x1="14" y1="38" x2="66" y2="38" stroke="#FDE047" stroke-width="3" stroke-dasharray="4 2"/><circle cx="54" cy="38" r="4" fill="#FACC15" stroke="#854D0E" stroke-width="2"/></svg>`
+            },
+            {
+                id: 6,
+                name: "Pensel Warna",
+                priceSen: 900,
+                category: "Alat Seni",
+                needType: "Keperluan",
+                bg: "bg-rose-100",
+                svg: `<svg viewBox="0 0 80 80" class="w-16 h-16"><rect x="20" y="26" width="40" height="42" rx="4" fill="#FB7185" stroke="#9F1239" stroke-width="3"/><polygon points="24,26 28,14 32,26" fill="#EF4444"/><polygon points="32,26 36,12 40,26" fill="#FACC15"/><polygon points="40,26 44,12 48,26" fill="#22C55E"/><polygon points="48,26 52,14 56,26" fill="#3B82F6"/><rect x="26" y="38" width="28" height="16" rx="2" fill="#FFF"/></svg>`
+            },
+            {
+                id: 7,
+                name: "Buku Cerita",
+                priceSen: 1500,
+                category: "Buku dan Bahan Bacaan",
+                needType: "Kehendak",
+                bg: "bg-emerald-100",
+                svg: `<svg viewBox="0 0 80 80" class="w-16 h-16"><rect x="16" y="12" width="48" height="56" rx="6" fill="#34D399" stroke="#065F46" stroke-width="3"/><circle cx="40" cy="35" r="10" fill="#FDE047"/><path d="M26 56 Q40 46 54 56" fill="none" stroke="#065F46" stroke-width="3" stroke-linecap="round"/></svg>`
+            },
+            {
+                id: 8,
+                name: "Beg Sekolah",
+                priceSen: 3500,
+                category: "Peralatan Sekolah",
+                needType: "Keperluan",
+                bg: "bg-indigo-100",
+                svg: `<svg viewBox="0 0 80 80" class="w-16 h-16"><path d="M30 20 C30 10, 50 10, 50 20" fill="none" stroke="#3730A3" stroke-width="4"/><rect x="18" y="20" width="44" height="48" rx="12" fill="#6366F1" stroke="#312E81" stroke-width="3"/><rect x="25" y="42" width="30" height="18" rx="5" fill="#818CF8" stroke="#312E81" stroke-width="2.5"/><line x1="25" y1="48" x2="55" y2="48" stroke="#FACC15" stroke-width="2.5"/></svg>`
+            },
+            {
+                id: 9,
+                name: "Botol Air",
+                priceSen: 1000,
+                category: "Peralatan Sekolah",
+                needType: "Keperluan",
+                bg: "bg-cyan-100",
+                svg: `<svg viewBox="0 0 80 80" class="w-16 h-16"><rect x="32" y="10" width="16" height="8" rx="2" fill="#0284C7" stroke="#0C4A6E" stroke-width="2.5"/><rect x="26" y="18" width="28" height="50" rx="8" fill="#22D3EE" stroke="#0E7490" stroke-width="3"/><path d="M26 42 Q40 36 54 42 L54 60 Q40 66 26 60 Z" fill="#06B6D4" opacity="0.6"/></svg>`
+            },
+            {
+                id: 10,
+                name: "Buku Nota",
+                priceSen: 600,
+                category: "Buku dan Bahan Bacaan",
+                needType: "Keperluan",
+                bg: "bg-orange-100",
+                svg: `<svg viewBox="0 0 80 80" class="w-16 h-16"><rect x="20" y="12" width="42" height="56" rx="4" fill="#FB923C" stroke="#9A3412" stroke-width="3"/><circle cx="18" cy="22" r="3" fill="#475569"/><circle cx="18" cy="34" r="3" fill="#475569"/><circle cx="18" cy="46" r="3" fill="#475569"/><circle cx="18" cy="58" r="3" fill="#475569"/><rect x="30" y="24" width="22" height="10" rx="2" fill="#FFF"/></svg>`
+            },
+            {
+                id: 11,
+                name: "Set Alat Seni",
+                priceSen: 2000,
+                category: "Alat Seni",
+                needType: "Kehendak",
+                bg: "bg-fuchsia-100",
+                svg: `<svg viewBox="0 0 80 80" class="w-16 h-16"><ellipse cx="40" cy="44" rx="26" ry="20" fill="#FDE68A" stroke="#92400E" stroke-width="3"/><circle cx="28" cy="38" r="4" fill="#EF4444"/><circle cx="40" cy="34" r="4" fill="#3B82F6"/><circle cx="52" cy="40" r="4" fill="#22C55E"/><circle cx="46" cy="52" r="4" fill="#A855F7"/><circle cx="28" cy="50" r="4" fill="#FFF" stroke="#92400E" stroke-width="2"/></svg>`
+            }
+        ];
+
+        const CATEGORIES = [
+            { id: "Semua", label: "Semua Barang", icon: "🏪" },
+            { id: "Alat Tulis", label: "Alat Tulis", icon: "✏️" },
+            { id: "Buku dan Bahan Bacaan", label: "Buku & Bacaan", icon: "📚" },
+            { id: "Peralatan Sekolah", label: "Peralatan Sekolah", icon: "🎒" },
+            { id: "Alat Seni", label: "Alat Seni", icon: "🎨" }
+        ];
+
+        // Exact Malaysian Currency Denomination Stock (Total value = RM232.50)
+        const INITIAL_DENOMINATIONS = [
+            { id: "rm50", label: "RM50", valueSen: 5000, type: "note", initialStock: 1, stock: 1, color: "bg-teal-100 border-teal-500 text-teal-950" },
+            { id: "rm20", label: "RM20", valueSen: 2000, type: "note", initialStock: 4, stock: 4, color: "bg-amber-100 border-amber-500 text-amber-950" },
+            { id: "rm10", label: "RM10", valueSen: 1000, type: "note", initialStock: 8, stock: 8, color: "bg-rose-100 border-rose-500 text-rose-950" },
+            { id: "rm5",  label: "RM5",  valueSen: 500,  type: "note", initialStock: 10, stock: 10, color: "bg-emerald-100 border-emerald-500 text-emerald-950" },
+            { id: "rm1",  label: "RM1",  valueSen: 100,  type: "coin", initialStock: 10, stock: 10, color: "bg-sky-100 border-sky-500 text-sky-950" },
+            { id: "50s",  label: "50 sen", valueSen: 50, type: "coin", initialStock: 2, stock: 2, color: "bg-yellow-100 border-yellow-500 text-yellow-950" },
+            { id: "20s",  label: "20 sen", valueSen: 20, type: "coin", initialStock: 5, stock: 5, color: "bg-yellow-100 border-yellow-500 text-yellow-950" },
+            { id: "10s",  label: "10 sen", valueSen: 10, type: "coin", initialStock: 10, stock: 10, color: "bg-slate-100 border-slate-400 text-slate-800" },
+            { id: "5s",   label: "5 sen",  valueSen: 5,  type: "coin", initialStock: 10, stock: 10, color: "bg-slate-100 border-slate-400 text-slate-800" }
+        ];
+
+        const DISCUSSION_PHASES = {
+            1: {
+                title: "FASA 1: PEMILIHAN BARANG",
+                questions: [
+                    "1. Apakah barang yang kumpulan kita perlukan?",
+                    "2. Barang manakah yang patut kita utamakan?",
+                    "3. Adakah semua barang yang dipilih benar-benar diperlukan?",
+                    "4. Bolehkah kita membeli semua barang ini dengan bajet RM80?"
+                ]
+            },
+            2: {
+                title: "FASA 2: PENGIRAAN JUMLAH",
+                questions: [
+                    "1. Berapakah harga setiap barang?",
+                    "2. Berapakah jumlah keseluruhan pembelian?",
+                    "3. Berapakah baki bajet kumpulan kita?",
+                    "4. Siapakah yang boleh menyemak semula pengiraan ini?"
+                ]
+            },
+            3: {
+                title: "FASA 3: PEMBAYARAN",
+                questions: [
+                    "1. Wang kertas dan syiling manakah yang sesuai digunakan?",
+                    "2. Bolehkah kita membayar menggunakan wang yang tersedia?",
+                    "3. Adakah terdapat kombinasi wang lain yang boleh digunakan?"
+                ]
+            },
+            4: {
+                title: "FASA 4: PENGIRAAN BAKI",
+                questions: [
+                    "1. Berapakah baki wang yang perlu diterima?",
+                    "2. Bagaimanakah kita mendapatkan jawapan tersebut?",
+                    "3. Bagaimanakah kita boleh menyemak jawapan kita?",
+                    "4. Adakah pengiraan kita betul?"
+                ]
+            }
+        };
+
+        const STAGE_INFO = [
+            { num: 1, title: "1. Selamat Datang", subtitle: "Kenali Misi & Peranan" },
+            { num: 2, title: "2. Pilih Barang", subtitle: "Bajet Maksimum RM80" },
+            { num: 3, title: "3. Pembayaran", subtitle: "Pilih Wang Malaysia" },
+            { num: 4, title: "4. Kira Baki", subtitle: "Semak Baki Wang" },
+            { num: 5, title: "5. Misi Selesai", subtitle: "Resit & Refleksi" }
+        ];
+
+        /**
+         * ====================================================================
+         * 2. APPLICATION STATE & STORAGE MANAGEMENT
+         * ====================================================================
+         */
+        let state = {
+            currentStage: 1,
+            selectedCategory: 'Semua',
+            groupName: 'Kumpulan 1 (Bijak)',
+            roleNames: ['', '', '', ''],
+            cart: [], // Array of { productId, qty }
+            stock: JSON.parse(JSON.stringify(INITIAL_DENOMINATIONS)),
+            selectedPayment: {}, // Map of denomId -> count selected by pupil
+            transactionCompleted: false,
+            victorySoundPlayed: false,
+            soundEnabled: true,
+            lastTransaction: null, // Stores snapshot for Stage 4 & 5
+            discussionPhase: 1,
+            chatHistory: [
+                { sender: "🏪 Pak Cik Kedai", text: "Hai kumpulan! Gunakan ruang ini untuk berbincang sebelum membuat pilihan.", time: "Mula" }
+            ]
+        };
+
+        /**
+         * ====================================================================
+         * 2B. WEB AUDIO API SOUND EFFECTS ENGINE (LIGHTWEIGHT & KID-FRIENDLY)
+         * ====================================================================
+         */
+        const SoundFX = {
+            ctx: null,
+            activeNodes: [],
+            lastPlayedAt: 0,
+
+            init() {
+                if (!this.ctx) {
+                    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+                    if (AudioCtx) {
+                        this.ctx = new AudioCtx();
+                    }
+                }
+                if (this.ctx && this.ctx.state === 'suspended') {
+                    this.ctx.resume().catch(() => {});
+                }
+            },
+
+            stopAll() {
+                this.activeNodes.forEach(node => {
+                    try {
+                        node.stop();
+                        node.disconnect();
+                    } catch (e) {}
+                });
+                this.activeNodes = [];
+            },
+
+            canPlay(minGapMs = 180) {
+                if (!state.soundEnabled) return false;
+                this.init();
+                if (!this.ctx) return false;
+                const nowMs = Date.now();
+                if (nowMs - this.lastPlayedAt < minGapMs) return false;
+                this.lastPlayedAt = nowMs;
+                this.stopAll();
+                return true;
+            },
+
+            playTone(freq, startTime, duration, type = 'sine', peakGain = 0.16) {
+                if (!this.ctx) return;
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = type;
+                osc.frequency.setValueAtTime(freq, startTime);
+
+                // Smooth attack and gentle release to avoid clicks
+                gain.gain.setValueAtTime(0.0001, startTime);
+                gain.gain.exponentialRampToValueAtTime(peakGain, startTime + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.0001, startTime + duration);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.start(startTime);
+                osc.stop(startTime + duration + 0.02);
+                this.activeNodes.push(osc);
+            },
+
+            // 1. Cheerful short success chime (ascending C5 -> E5 -> G5)
+            playSuccess() {
+                if (!this.canPlay(200)) return;
+                const t = this.ctx.currentTime;
+                this.playTone(523.25, t, 0.14, 'triangle', 0.18);        // C5
+                this.playTone(659.25, t + 0.10, 0.14, 'triangle', 0.18); // E5
+                this.playTone(783.99, t + 0.20, 0.28, 'sine', 0.20);     // G5
+            },
+
+            // 2. Gentle, soft error sound (soft descending E4 -> C4)
+            playGentleError() {
+                if (!this.canPlay(220)) return;
+                const t = this.ctx.currentTime;
+                this.playTone(329.63, t, 0.18, 'sine', 0.12);        // E4
+                this.playTone(261.63, t + 0.15, 0.24, 'sine', 0.11); // C4
+            },
+
+            // 3. Celebratory victory fanfare (C5 -> E5 -> G5 -> C6 chord)
+            playVictory() {
+                if (!this.canPlay(300)) return;
+                const t = this.ctx.currentTime;
+                this.playTone(523.25, t, 0.13, 'triangle', 0.18);        // C5
+                this.playTone(659.25, t + 0.11, 0.13, 'triangle', 0.18); // E5
+                this.playTone(783.99, t + 0.22, 0.13, 'triangle', 0.18); // G5
+                this.playTone(1046.50, t + 0.34, 0.48, 'triangle', 0.22);// C6
+                this.playTone(659.25, t + 0.34, 0.48, 'sine', 0.12);     // E5 harmony
+            }
+        };
+
+        function updateSoundToggleUI() {
+            const btn = document.getElementById('btn-sound-toggle');
+            const icon = document.getElementById('sound-toggle-icon');
+            const label = document.getElementById('sound-toggle-label');
+            if (!btn || !icon || !label) return;
+
+            if (state.soundEnabled) {
+                btn.className = "p-2 sm:px-3 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 rounded-xl border border-emerald-300 text-xs font-bold flex items-center gap-1.5 transition";
+                icon.textContent = "🔊";
+                label.textContent = "Bunyi: ON";
+            } else {
+                btn.className = "p-2 sm:px-3 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl border border-slate-300 text-xs font-bold flex items-center gap-1.5 transition";
+                icon.textContent = "🔇";
+                label.textContent = "Bunyi: OFF";
+            }
+        }
+
+        function toggleSound() {
+            state.soundEnabled = !state.soundEnabled;
+            if (!state.soundEnabled) {
+                SoundFX.stopAll();
+            } else {
+                SoundFX.init();
+                SoundFX.playSuccess();
+            }
+            saveState();
+            updateSoundToggleUI();
+        }
+
+        // Unlock browser audio context on first pupil interaction
+        ['pointerdown', 'keydown'].forEach(evt => {
+            window.addEventListener(evt, () => SoundFX.init(), { once: true, passive: true });
+        });
+
+        function saveState() {
+            try {
+                localStorage.setItem('misi_bijak_berbelanja_v1', JSON.stringify(state));
+            } catch (e) {
+                // Ignore storage quota errors in restricted frames
+            }
+        }
+
+        function loadState() {
+            try {
+                const saved = localStorage.getItem('misi_bijak_berbelanja_v1');
+                if (saved) {
+                    const parsed = JSON.parse(saved);
+                    state = { ...state, ...parsed };
+                }
+            } catch (e) {
+                // Fallback to default state
+            }
+        }
+
+        /**
+         * ====================================================================
+         * 3. CURRENCY FORMATTING & MATHEMATICAL HELPERS (INTEGER SEN)
+         * ====================================================================
+         */
+        function formatRM(sen) {
+            const sign = sen < 0 ? "-" : "";
+            const absSen = Math.abs(Math.round(sen));
+            const ringgit = Math.floor(absSen / 100);
+            const cents = absSen % 100;
+            return `${sign}RM${ringgit}.${cents.toString().padStart(2, '0')}`;
+        }
+
+        function getCartTotalSen() {
+            return state.cart.reduce((sum, item) => {
+                const prod = PRODUCTS.find(p => p.id === item.productId);
+                return sum + (prod ? prod.priceSen * item.qty : 0);
+            }, 0);
+        }
+
+        function getRemainingBudgetSen() {
+            return ORIGINAL_BUDGET_SEN - getCartTotalSen();
+        }
+
+        function getSelectedPaymentTotalSen() {
+            let total = 0;
+            for (const [denomId, count] of Object.entries(state.selectedPayment)) {
+                const denom = state.stock.find(d => d.id === denomId);
+                if (denom && count > 0) {
+                    total += denom.valueSen * count;
+                }
+            }
+            return total;
+        }
+
+        /**
+         * ====================================================================
+         * 4. SHOPKEEPER GUIDANCE & FEEDBACK SYSTEM
+         * ====================================================================
+         */
+        function setShopkeeperFeedback(message, badgeText = "Info", badgeColor = "bg-emerald-500") {
+            const msgEl = document.getElementById('shopkeeper-message');
+            const badgeEl = document.getElementById('feedback-badge');
+            if (msgEl) msgEl.innerHTML = message;
+            if (badgeEl) {
+                badgeEl.textContent = badgeText;
+                badgeEl.className = `px-2.5 py-0.5 text-white font-bold text-xs rounded-full ${badgeColor}`;
+                badgeEl.classList.remove('hidden');
+            }
+        }
+
+        function showShopkeeperHint() {
+            const hintsByStage = {
+                1: "💡 Petunjuk: Lantik 4 peranan dalam kumpulan kamu dahulu, kemudian tekan butang hijau <strong>'Mula Misi Membeli-Belah'</strong>!",
+                2: "💡 Petunjuk: Baki bajet dikira menggunakan <strong>RM80.00 − Jumlah Belian</strong>. Cuba pilih barang keperluan dahulu supaya bajet mencukupi!",
+                3: "💡 Petunjuk: Kamu boleh gabungkan wang kertas besar (seperti RM50 atau RM20) dan wang kecil supaya jumlah bayaran sama atau lebih daripada jumlah belian.",
+                4: "💡 Petunjuk: Formula Baki Wang ialah <strong>Jumlah Wang Dibayar − Jumlah Belian</strong>. Contoh: Jika bayar RM50.00 dan belian RM46.00, bakinya ialah RM4.00!",
+                5: "💡 Petunjuk: Hebat! Bincangkan 4 soalan refleksi bersama kumpulan untuk memahami kepentingan merancang perbelanjaan."
+            };
+            setShopkeeperFeedback(hintsByStage[state.currentStage] || hintsByStage[1], "Petunjuk", "bg-amber-500");
+        }
+
+        /**
+         * ====================================================================
+         * 5. STAGE NAVIGATION & STEPPER RENDERING
+         * ====================================================================
+         */
+        function renderStepper() {
+            const stepper = document.getElementById('stage-stepper');
+            stepper.innerHTML = STAGE_INFO.map(st => {
+                const isActive = st.num === state.currentStage;
+                const isDone = st.num < state.currentStage;
+                const canClick = st.num <= 2 || (st.num === 3 && state.cart.length > 0 && getCartTotalSen() <= ORIGINAL_BUDGET_SEN) || (st.num >= 4 && state.transactionCompleted);
+
+                let styleClass = "bg-white/70 border-slate-200 text-slate-500";
+                if (isActive) {
+                    styleClass = "bg-amber-400 border-amber-600 text-amber-950 shadow-xs scale-[1.02]";
+                } else if (isDone) {
+                    styleClass = "bg-emerald-100 border-emerald-400 text-emerald-900";
+                }
+
+                return `
+                    <li class="flex-1">
+                        <button onclick="${canClick ? `goToStage(${st.num})` : ''}" ${!canClick ? 'disabled' : ''}
+                            class="w-full text-left px-2.5 py-1.5 rounded-xl border-2 transition flex items-center gap-2 ${styleClass} ${canClick ? 'cursor-pointer' : 'cursor-not-allowed opacity-70'}">
+                            <span class="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${isActive ? 'bg-amber-900 text-white' : isDone ? 'bg-emerald-600 text-white' : 'bg-slate-200 text-slate-600'}">
+                                ${isDone ? '✓' : st.num}
+                            </span>
+                            <div class="truncate">
+                                <span class="block font-comic font-bold text-xs leading-tight truncate">${st.title}</span>
+                                <span class="block text-[10px] opacity-80 truncate">${st.subtitle}</span>
+                            </div>
+                        </button>
+                    </li>
+                `;
+            }).join('');
+        }
+
+        function goToStage(stageNum) {
+            if (stageNum === 3) {
+                const totalSen = getCartTotalSen();
+                if (state.cart.length === 0) {
+                    setShopkeeperFeedback("Sila pilih sekurang-kurangnya satu barang sebelum membuat pembayaran.", "Perhatian", "bg-amber-500");
+                    return;
+                }
+                if (totalSen > ORIGINAL_BUDGET_SEN) {
+                    setShopkeeperFeedback("Oops! Bajet kamu tidak mencukupi. Cuba pilih semula barang.", "Melebihi Bajet", "bg-rose-500");
+                    return;
+                }
+            }
+            if ((stageNum === 4 || stageNum === 5) && !state.transactionCompleted) {
+                setShopkeeperFeedback("Sila lengkapkan pembayaran di Tahap 3 terlebih dahulu.", "Perhatian", "bg-amber-500");
+                return;
+            }
+
+            state.currentStage = stageNum;
+            saveState();
+
+            // Hide all stages, show active stage
+            document.querySelectorAll('.stage-view').forEach(el => el.classList.add('hidden'));
+            const target = document.getElementById(`stage-${stageNum}`);
+            if (target) target.classList.remove('hidden');
+
+            renderStepper();
+            updateTopBudgetDisplay();
+
+            // Stage-specific initialization & shopkeeper messages
+            if (stageNum === 1) {
+                setShopkeeperFeedback("Selamat datang ke Kedai Alat Tulis Ceria! Kenali 4 peranan kumpulan kamu sebelum memulakan misi.", "Tahap 1", "bg-sky-500");
+            } else if (stageNum === 2) {
+                renderCategories();
+                renderCatalog();
+                renderCart();
+                setShopkeeperFeedback("Jom pilih barang keperluan sekolah! Ingat, bajet maksimum kumpulan kamu ialah <strong>RM80.00</strong>.", "Tahap 2", "bg-emerald-500");
+            } else if (stageNum === 3) {
+                renderPaymentWallet();
+                renderPaymentSummary();
+                setShopkeeperFeedback("Masa untuk membayar! Pilih wang kertas dan syiling Malaysia untuk membayar jumlah belian kamu.", "Tahap 3", "bg-sky-600");
+            } else if (stageNum === 4) {
+                renderChangeStage();
+                setShopkeeperFeedback("Pembayaran berjaya! Sekarang kira <strong>baki wang</strong> yang perlu diterima oleh kumpulan kamu.", "Tahap 4", "bg-purple-600");
+            } else if (stageNum === 5) {
+                renderReceiptStage();
+                setShopkeeperFeedback("TAHNIAH! Kumpulan kamu telah berjaya menamatkan Misi Bijak Berbelanja!", "Misi Selesai", "bg-emerald-600");
+                if (!state.victorySoundPlayed) {
+                    state.victorySoundPlayed = true;
+                    saveState();
+                    SoundFX.playVictory();
+                }
+            }
+        }
+
+        function updateTopBudgetDisplay() {
+            const totalSen = getCartTotalSen();
+            const remSen = getRemainingBudgetSen();
+
+            document.getElementById('header-total-purchase').textContent = formatRM(totalSen);
+            const remEl = document.getElementById('header-remaining-budget');
+            remEl.textContent = formatRM(remSen);
+            remEl.className = `font-comic text-sm sm:text-base md:text-lg font-bold ${remSen < 0 ? 'text-rose-600' : 'text-emerald-600'}`;
+        }
+
+        /**
+         * ====================================================================
+         * 6. STAGE 2: CATALOGUE, CATEGORIES & SHOPPING CART LOGIC
+         * ====================================================================
+         */
+        function renderCategories() {
+            const container = document.getElementById('category-list');
+            container.innerHTML = CATEGORIES.map(cat => {
+                const active = state.selectedCategory === cat.id;
+                return `
+                    <button onclick="selectCategory('${cat.id}')"
+                        class="shrink-0 w-auto lg:w-full text-left px-3 py-2.5 rounded-2xl border-2 font-bold text-xs sm:text-sm flex items-center gap-2 transition ${active ? 'bg-amber-400 border-amber-600 text-amber-950 shadow-xs' : 'bg-white border-amber-200 text-slate-700 hover:bg-amber-100'}">
+                        <span class="text-base">${cat.icon}</span>
+                        <span>${cat.label}</span>
+                    </button>
+                `;
+            }).join('');
+        }
+
+        function selectCategory(catId) {
+            state.selectedCategory = catId;
+            renderCategories();
+            renderCatalog();
+        }
+
+        function renderCatalog() {
+            const grid = document.getElementById('product-grid');
+            const filtered = state.selectedCategory === 'Semua'
+                ? PRODUCTS
+                : PRODUCTS.filter(p => p.category === state.selectedCategory);
+
+            document.getElementById('catalog-count-badge').textContent = `${filtered.length} Barang`;
+            const remBudgetSen = getRemainingBudgetSen();
+
+            grid.innerHTML = filtered.map(prod => {
+                const inCart = state.cart.find(c => c.productId === prod.id);
+                const qty = inCart ? inCart.qty : 0;
+                const canAfford = prod.priceSen <= remBudgetSen;
+
+                return `
+                    <div class="bg-white border-2 ${qty > 0 ? 'border-emerald-400 ring-2 ring-emerald-100' : 'border-amber-200'} rounded-2xl p-3.5 flex flex-col justify-between shadow-xs hover:shadow-md transition wooden-shelf">
+                        <div>
+                            <div class="flex items-start justify-between gap-2 mb-2">
+                                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${prod.needType === 'Keperluan' ? 'bg-emerald-100 text-emerald-800' : 'bg-pink-100 text-pink-800'}">
+                                    ${prod.needType}
+                                </span>
+                                ${qty > 0 ? `<span class="bg-emerald-500 text-white text-[11px] font-bold px-2 py-0.5 rounded-full">Dalam Bakul: ${qty}</span>` : ''}
+                            </div>
+
+                            <!-- Illustrated Product Frame -->
+                            <div class="${prod.bg} rounded-2xl h-24 flex items-center justify-center mb-2.5 border border-black/5">
+                                ${prod.svg}
+                            </div>
+
+                            <h3 class="font-comic font-bold text-base text-slate-800 leading-tight">${prod.name}</h3>
+                            <p class="text-[11px] text-slate-500 mt-0.5">${prod.category}</p>
+                        </div>
+
+                        <div class="mt-3 pt-2.5 border-t border-slate-100 flex items-center justify-between gap-2">
+                            <span class="font-comic font-bold text-lg text-amber-700">${formatRM(prod.priceSen)}</span>
+                            <button onclick="addToCart(${prod.id})"
+                                class="btn-game px-3 py-2 rounded-xl font-bold text-xs flex items-center gap-1 ${canAfford ? 'bg-sky-500 hover:bg-sky-400 text-white border border-sky-700' : 'bg-rose-100 text-rose-700 border border-rose-300'}">
+                                <span>➕</span>
+                                <span>Tambah</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function addToCart(productId) {
+            const prod = PRODUCTS.find(p => p.id === productId);
+            if (!prod) return;
+
+            const currentTotal = getCartTotalSen();
+            // Enforce RM80 budget ceiling
+            if (currentTotal + prod.priceSen > ORIGINAL_BUDGET_SEN) {
+                SoundFX.playGentleError();
+                const warningBox = document.getElementById('budget-warning-box');
+                warningBox.classList.remove('hidden');
+                setShopkeeperFeedback(
+                    `Oops! Bajet kamu tidak mencukupi untuk menambah <strong>${prod.name} (${formatRM(prod.priceSen)})</strong>. Baki bajet hanya <strong>${formatRM(getRemainingBudgetSen())}</strong>. Cuba pilih semula barang.`,
+                    "Melebihi Bajet!",
+                    "bg-rose-500"
+                );
+                return;
+            }
+
+            const existing = state.cart.find(item => item.productId === productId);
+            if (existing) {
+                existing.qty += 1;
+            } else {
+                state.cart.push({ productId, qty: 1 });
+            }
+
+            // Reset any prior uncompleted payment state when cart changes
+            state.transactionCompleted = false;
+            state.victorySoundPlayed = false;
+            saveState();
+            SoundFX.playSuccess();
+
+            const newTotal = getCartTotalSen();
+            const newRem = getRemainingBudgetSen();
+
+            if (newRem === 0) {
+                setShopkeeperFeedback("Hebat! Jumlah pembelian kamu tepat RM80.00 dan masih dalam bajet!", "Tepat RM80!", "bg-emerald-600");
+            } else {
+                setShopkeeperFeedback(`Pilihan yang bagus! <strong>${prod.name}</strong> ditambah. Jumlah pembelian kamu <strong>${formatRM(newTotal)}</strong> masih dalam bajet RM80!`, "Dalam Bajet", "bg-emerald-500");
+            }
+
+            updateTopBudgetDisplay();
+            renderCatalog();
+            renderCart();
+            renderStepper();
+        }
+
+        function updateCartQty(productId, delta) {
+            const index = state.cart.findIndex(item => item.productId === productId);
+            if (index === -1) return;
+
+            const prod = PRODUCTS.find(p => p.id === productId);
+            if (delta > 0) {
+                if (getCartTotalSen() + prod.priceSen > ORIGINAL_BUDGET_SEN) {
+                    SoundFX.playGentleError();
+                    document.getElementById('budget-warning-box').classList.remove('hidden');
+                    setShopkeeperFeedback("Oops! Bajet kamu tidak mencukupi. Cuba pilih semula barang.", "Melebihi Bajet!", "bg-rose-500");
+                    return;
+                }
+                state.cart[index].qty += 1;
+                SoundFX.playSuccess();
+            } else {
+                state.cart[index].qty -= 1;
+                if (state.cart[index].qty <= 0) {
+                    state.cart.splice(index, 1);
+                }
+            }
+
+            state.transactionCompleted = false;
+            state.victorySoundPlayed = false;
+            saveState();
+            updateTopBudgetDisplay();
+            renderCatalog();
+            renderCart();
+            renderStepper();
+        }
+
+        function removeFromCart(productId) {
+            state.cart = state.cart.filter(item => item.productId !== productId);
+            state.transactionCompleted = false;
+            state.victorySoundPlayed = false;
+            saveState();
+            updateTopBudgetDisplay();
+            renderCatalog();
+            renderCart();
+            renderStepper();
+            setShopkeeperFeedback("Barang telah dikeluarkan dari bakul. Baki bajet kamu telah dikemas kini.", "Dikemas Kini", "bg-sky-500");
+        }
+
+        function clearCart() {
+            state.cart = [];
+            state.transactionCompleted = false;
+            state.victorySoundPlayed = false;
+            saveState();
+            updateTopBudgetDisplay();
+            renderCatalog();
+            renderCart();
+            renderStepper();
+            setShopkeeperFeedback("Bakul belian telah dikosongkan. Baki bajet kembali RM80.00.", "Bakul Kosong", "bg-amber-500");
+        }
+
+        function renderCart() {
+            const container = document.getElementById('cart-items-container');
+            const totalSen = getCartTotalSen();
+            const remSen = getRemainingBudgetSen();
+            const percentUsed = Math.min(100, Math.round((totalSen / ORIGINAL_BUDGET_SEN) * 100));
+
+            // Update budget meter
+            document.getElementById('budget-percent-text').textContent = `${percentUsed}% Digunakan`;
+            const bar = document.getElementById('budget-progress-bar');
+            bar.style.width = `${percentUsed}%`;
+            bar.className = `h-full rounded-full transition-all duration-300 ${
+                percentUsed > 90 ? 'bg-amber-500' : percentUsed > 65 ? 'bg-sky-500' : 'bg-emerald-500'
+            }`;
+
+            document.getElementById('cart-total-display').textContent = formatRM(totalSen);
+            document.getElementById('cart-remaining-display').textContent = formatRM(remSen);
+
+            // Hide warning if within budget
+            if (totalSen <= ORIGINAL_BUDGET_SEN) {
+                document.getElementById('budget-warning-box').classList.add('hidden');
+            }
+
+            const payBtn = document.getElementById('btn-to-payment');
+            payBtn.disabled = state.cart.length === 0 || totalSen > ORIGINAL_BUDGET_SEN;
+
+            if (state.cart.length === 0) {
+                container.innerHTML = `
+                    <div class="bg-white/80 border-2 border-dashed border-pink-200 rounded-2xl p-6 text-center text-slate-500">
+                        <div class="text-3xl mb-1">🛒</div>
+                        <p class="text-xs font-bold">Bakul belian masih kosong.</p>
+                        <p class="text-[11px] mt-0.5">Pilih barang dari katalog di sebelah kiri.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = state.cart.map(item => {
+                const prod = PRODUCTS.find(p => p.id === item.productId);
+                const subtotalSen = prod.priceSen * item.qty;
+
+                return `
+                    <div class="bg-white border border-pink-200 rounded-2xl p-2.5 flex items-center justify-between gap-2 shadow-2xs">
+                        <div class="min-w-0 flex-1">
+                            <h4 class="font-comic font-bold text-sm text-slate-800 truncate">${prod.name}</h4>
+                            <p class="text-[11px] text-slate-500">${formatRM(prod.priceSen)} × ${item.qty} = <strong class="text-pink-600">${formatRM(subtotalSen)}</strong></p>
+                        </div>
+
+                        <div class="flex items-center gap-1 shrink-0">
+                            <button onclick="updateCartQty(${prod.id}, -1)" aria-label="Kurangkan kuantiti" class="w-7 h-7 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-sm flex items-center justify-center border border-amber-300">−</button>
+                            <span class="w-6 text-center font-bold text-xs">${item.qty}</span>
+                            <button onclick="updateCartQty(${prod.id}, 1)" aria-label="Tambah kuantiti" class="w-7 h-7 rounded-lg bg-emerald-100 hover:bg-emerald-200 text-emerald-900 font-bold text-sm flex items-center justify-center border border-emerald-300">+</button>
+                            <button onclick="removeFromCart(${prod.id})" aria-label="Buang barang" class="ml-1 w-7 h-7 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs flex items-center justify-center border border-rose-200">🗑️</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        /**
+         * ====================================================================
+         * 7. STAGE 3: MALAYSIAN CURRENCY PAYMENT & STOCK CONSERVATION
+         * ====================================================================
+         */
+        function renderPaymentWallet() {
+            const notesGrid = document.getElementById('banknotes-grid');
+            const coinsGrid = document.getElementById('coins-grid');
+
+            const notes = state.stock.filter(d => d.type === 'note');
+            const coins = state.stock.filter(d => d.type === 'coin');
+
+            notesGrid.innerHTML = notes.map(denom => {
+                const selectedCount = state.selectedPayment[denom.id] || 0;
+                const availableCount = denom.stock - selectedCount;
+                const outOfStock = availableCount <= 0;
+
+                return `
+                    <button onclick="selectDenomination('${denom.id}')" ${outOfStock ? 'disabled' : ''}
+                        class="banknote-card relative border-2 rounded-2xl p-3 text-left flex flex-col justify-between min-h-[84px] shadow-xs ${denom.color} ${outOfStock ? 'opacity-45 cursor-not-allowed' : 'cursor-pointer'}">
+                        <div class="flex items-center justify-between w-full">
+                            <span class="text-[10px] font-bold uppercase opacity-75">Ringgit Malaysia</span>
+                            <span class="px-2 py-0.5 bg-white/90 rounded-full text-[11px] font-bold shadow-2xs">
+                                Stok: ${availableCount}
+                            </span>
+                        </div>
+                        <div class="font-comic font-bold text-xl sm:text-2xl mt-2 flex items-center justify-between">
+                            <span>${denom.label}</span>
+                            <span class="text-xs bg-white/80 px-2 py-0.5 rounded-lg">+ Pilih</span>
+                        </div>
+                    </button>
+                `;
+            }).join('');
+
+            coinsGrid.innerHTML = coins.map(denom => {
+                const selectedCount = state.selectedPayment[denom.id] || 0;
+                const availableCount = denom.stock - selectedCount;
+                const outOfStock = availableCount <= 0;
+
+                return `
+                    <button onclick="selectDenomination('${denom.id}')" ${outOfStock ? 'disabled' : ''}
+                        class="banknote-card border-2 rounded-2xl p-2.5 flex flex-col items-center justify-center text-center shadow-xs ${denom.color} ${outOfStock ? 'opacity-45 cursor-not-allowed' : 'cursor-pointer'}">
+                        <div class="w-11 h-11 rounded-full bg-white/90 border-2 border-current flex items-center justify-center font-comic font-bold text-sm shadow-inner mb-1">
+                            ${denom.label}
+                        </div>
+                        <span class="text-[11px] font-bold">Stok: ${availableCount}</span>
+                    </button>
+                `;
+            }).join('');
+
+            renderSelectedPaymentTray();
+        }
+
+        function selectDenomination(denomId) {
+            const denom = state.stock.find(d => d.id === denomId);
+            if (!denom) return;
+
+            const currentSelected = state.selectedPayment[denomId] || 0;
+            if (currentSelected >= denom.stock) {
+                setShopkeeperFeedback(`Stok wang <strong>${denom.label}</strong> sudah habis digunakan!`, "Stok Habis", "bg-amber-500");
+                return;
+            }
+
+            state.selectedPayment[denomId] = currentSelected + 1;
+            saveState();
+            renderPaymentWallet();
+            renderPaymentSummary();
+        }
+
+        function removeSelectedDenomination(denomId) {
+            if (!state.selectedPayment[denomId]) return;
+            state.selectedPayment[denomId] -= 1;
+            if (state.selectedPayment[denomId] <= 0) {
+                delete state.selectedPayment[denomId];
+            }
+            saveState();
+            renderPaymentWallet();
+            renderPaymentSummary();
+        }
+
+        function clearSelectedPayment() {
+            state.selectedPayment = {};
+            saveState();
+            renderPaymentWallet();
+            renderPaymentSummary();
+        }
+
+        function renderSelectedPaymentTray() {
+            const tray = document.getElementById('selected-payment-tray');
+            const entries = Object.entries(state.selectedPayment).filter(([, count]) => count > 0);
+
+            if (entries.length === 0) {
+                tray.innerHTML = `<span class="text-xs text-slate-400 italic">Belum ada wang dipilih. Klik wang kertas atau syiling di atas.</span>`;
+                return;
+            }
+
+            let chipsHtml = '';
+            for (const [denomId, count] of entries) {
+                const denom = state.stock.find(d => d.id === denomId);
+                for (let i = 0; i < count; i++) {
+                    chipsHtml += `
+                        <button onclick="removeSelectedDenomination('${denom.id}')" title="Klik untuk buang"
+                            class="px-3 py-1.5 rounded-xl border-2 font-comic font-bold text-xs sm:text-sm flex items-center gap-1.5 shadow-2xs hover:scale-95 transition ${denom.color}">
+                            <span>${denom.label}</span>
+                            <span class="text-[10px] bg-white/80 rounded-full px-1.5">✕</span>
+                        </button>
+                    `;
+                }
+            }
+            tray.innerHTML = chipsHtml;
+        }
+
+        function renderPaymentSummary() {
+            const miniCart = document.getElementById('payment-mini-cart');
+            miniCart.innerHTML = state.cart.map(item => {
+                const prod = PRODUCTS.find(p => p.id === item.productId);
+                return `
+                    <div class="flex justify-between">
+                        <span>${prod.name} (×${item.qty})</span>
+                        <span class="font-bold">${formatRM(prod.priceSen * item.qty)}</span>
+                    </div>
+                `;
+            }).join('');
+
+            const purchaseSen = getCartTotalSen();
+            const paidSen = getSelectedPaymentTotalSen();
+
+            document.getElementById('pay-stage-total').textContent = formatRM(purchaseSen);
+            document.getElementById('pay-stage-selected').textContent = formatRM(paidSen);
+
+            const statusBanner = document.getElementById('pay-status-banner');
+            const confirmBtn = document.getElementById('btn-confirm-payment');
+
+            if (paidSen === 0) {
+                statusBanner.className = "p-2.5 rounded-xl text-xs font-bold text-center bg-amber-100 text-amber-900";
+                statusBanner.textContent = "Sila pilih wang mencukupi untuk membayar.";
+                confirmBtn.disabled = true;
+            } else if (paidSen < purchaseSen) {
+                const shortSen = purchaseSen - paidSen;
+                statusBanner.className = "p-2.5 rounded-xl text-xs font-bold text-center bg-rose-100 text-rose-800 border border-rose-300";
+                statusBanner.textContent = `Wang belum mencukupi! Kurang ${formatRM(shortSen)} lagi.`;
+                confirmBtn.disabled = true;
+                setShopkeeperFeedback("Wang yang dipilih belum mencukupi. Mari tambah wang lagi.", "Wang Kurang", "bg-rose-500");
+            } else {
+                const changeSen = paidSen - purchaseSen;
+                statusBanner.className = "p-2.5 rounded-xl text-xs font-bold text-center bg-emerald-100 text-emerald-900 border border-emerald-300";
+                statusBanner.textContent = changeSen === 0
+                    ? "Wang mencukupi (Bayaran tepat tanpa baki)!"
+                    : `Wang mencukupi! Kamu akan menerima baki wang.`;
+                confirmBtn.disabled = false;
+                setShopkeeperFeedback("Bagus! Wang yang dipilih sudah mencukupi. Tekan <strong>'Sahkan Pembayaran'</strong>.", "Mencukupi", "bg-emerald-500");
+            }
+        }
+
+        /**
+         * ====================================================================
+         * 8. CHANGE DENOMINATION SOLVER & STOCK CONSERVATION ENGINE
+         * ====================================================================
+         */
+        function computeChangeDenominations(changeSen, stockAfterPayment) {
+            if (changeSen === 0) return [];
+
+            // Greedy decomposition sorted from largest denomination to smallest
+            const sorted = [...stockAfterPayment].sort((a, b) => b.valueSen - a.valueSen);
+            let remaining = changeSen;
+            const returned = [];
+
+            for (const denom of sorted) {
+                if (remaining <= 0) break;
+                const maxNeeded = Math.floor(remaining / denom.valueSen);
+                if (maxNeeded > 0) {
+                    returned.push({
+                        id: denom.id,
+                        label: denom.label,
+                        valueSen: denom.valueSen,
+                        count: maxNeeded,
+                        color: denom.color
+                    });
+                    remaining -= maxNeeded * denom.valueSen;
+                }
+            }
+            return returned;
+        }
+
+        function processPayment() {
+            const purchaseSen = getCartTotalSen();
+            const paidSen = getSelectedPaymentTotalSen();
+
+            // Strict validation: prevent insufficient payment
+            if (paidSen < purchaseSen) {
+                SoundFX.playGentleError();
+                setShopkeeperFeedback("Wang yang dipilih belum mencukupi. Mari tambah wang lagi.", "Bayaran Ditolak", "bg-rose-500");
+                return;
+            }
+
+            const changeSen = paidSen - purchaseSen;
+            const actualSpendingSen = purchaseSen;
+            const remainingBudgetSen = ORIGINAL_BUDGET_SEN - actualSpendingSen;
+
+            // Step 1: Deduct paid denominations from stock (never allowing negative stock)
+            const updatedStock = state.stock.map(denom => {
+                const paidCount = state.selectedPayment[denom.id] || 0;
+                const nextStock = Math.max(0, denom.stock - paidCount);
+                return { ...denom, stock: nextStock };
+            });
+
+            // Step 2: Determine returned change denominations and add back into available stock
+            const returnedDenoms = computeChangeDenominations(changeSen, updatedStock);
+            for (const ret of returnedDenoms) {
+                const target = updatedStock.find(d => d.id === ret.id);
+                if (target) {
+                    target.stock += ret.count;
+                }
+            }
+
+            // Commit conserved stock & transaction snapshot
+            state.stock = updatedStock;
+            state.selectedPayment = {};
+            state.transactionCompleted = true;
+            state.victorySoundPlayed = false;
+            state.lastTransaction = {
+                items: state.cart.map(item => {
+                    const prod = PRODUCTS.find(p => p.id === item.productId);
+                    return {
+                        name: prod.name,
+                        qty: item.qty,
+                        priceSen: prod.priceSen,
+                        subtotalSen: prod.priceSen * item.qty
+                    };
+                }),
+                purchaseSen,
+                paidSen,
+                changeSen,
+                actualSpendingSen,
+                remainingBudgetSen,
+                returnedDenoms,
+                changeVerifiedByPupil: false
+            };
+
+            saveState();
+            SoundFX.playSuccess();
+            goToStage(4);
+        }
+
+        /**
+         * ====================================================================
+         * 9. STAGE 4: CHANGE CALCULATION & VERIFICATION
+         * ====================================================================
+         */
+        function renderChangeStage() {
+            const tx = state.lastTransaction;
+            if (!tx) return;
+
+            document.getElementById('calc-paid-amount').textContent = formatRM(tx.paidSen);
+            document.getElementById('calc-purchase-amount').textContent = formatRM(tx.purchaseSen);
+
+            const inputEl = document.getElementById('pupil-change-input');
+            inputEl.value = tx.changeVerifiedByPupil ? (tx.changeSen / 100).toFixed(2) : '';
+
+            const resultBox = document.getElementById('change-verification-result');
+            if (tx.changeVerifiedByPupil) {
+                revealChangeVerification(true);
+            } else {
+                resultBox.classList.add('hidden');
+            }
+        }
+
+        function checkPupilChangeAnswer() {
+            const tx = state.lastTransaction;
+            if (!tx) return;
+
+            const rawVal = parseFloat(document.getElementById('pupil-change-input').value);
+            if (isNaN(rawVal) || rawVal < 0) {
+                SoundFX.playGentleError();
+                setShopkeeperFeedback("Sila masukkan jumlah baki wang dalam ruangan jawapan (contoh: 4.00).", "Masukkan Jawapan", "bg-amber-500");
+                return;
+            }
+
+            const pupilSen = Math.round(rawVal * 100);
+            const isCorrect = pupilSen === tx.changeSen;
+
+            if (isCorrect) {
+                tx.changeVerifiedByPupil = true;
+                saveState();
+                SoundFX.playSuccess();
+                revealChangeVerification(true);
+                setShopkeeperFeedback("Syabas! Kamu berjaya mengira baki dengan betul!", "Jawapan Tepat!", "bg-emerald-600");
+            } else {
+                SoundFX.playGentleError();
+                revealChangeVerification(false, pupilSen);
+                setShopkeeperFeedback("Jangan risau. Mari kita semak pengiraan bersama-sama.", "Cuba Semula", "bg-amber-500");
+            }
+        }
+
+        function revealChangeVerification(isCorrect, pupilSen = 0) {
+            const tx = state.lastTransaction;
+            const resultBox = document.getElementById('change-verification-result');
+            const alertBox = document.getElementById('change-feedback-alert');
+
+            resultBox.classList.remove('hidden');
+
+            if (isCorrect) {
+                alertBox.className = "p-4 rounded-2xl border-2 bg-emerald-100 border-emerald-400 text-emerald-950 font-medium text-sm";
+                alertBox.innerHTML = `
+                    <p class="font-bold text-base">🎉 Syabas! Kamu berjaya mengira baki dengan betul!</p>
+                    <p class="mt-1">Pengiraan: <strong>${formatRM(tx.paidSen)} − ${formatRM(tx.purchaseSen)} = ${formatRM(tx.changeSen)}</strong>.</p>
+                `;
+            } else {
+                alertBox.className = "p-4 rounded-2xl border-2 bg-amber-100 border-amber-400 text-amber-950 font-medium text-sm";
+                alertBox.innerHTML = `
+                    <p class="font-bold text-base">🤔 Jangan risau. Mari kita semak pengiraan bersama-sama.</p>
+                    <p class="mt-1">Jawapan kamu: <strong>${formatRM(pupilSen)}</strong>. Cuba tolakkan: <strong>${formatRM(tx.paidSen)} − ${formatRM(tx.purchaseSen)}</strong> dan tekan butang semak semula!</p>
+                `;
+            }
+
+            // Render returned denominations
+            const retList = document.getElementById('returned-denominations-list');
+            if (tx.returnedDenoms.length === 0) {
+                retList.innerHTML = `<span class="text-xs font-bold text-purple-800 bg-white px-3 py-1.5 rounded-xl border border-purple-200">Tiada baki wang (RM0.00) kerana bayaran adalah tepat.</span>`;
+            } else {
+                retList.innerHTML = tx.returnedDenoms.map(d => `
+                    <span class="px-3 py-1.5 rounded-xl border-2 font-comic font-bold text-xs sm:text-sm ${d.color}">
+                        ${d.label} × ${d.count}
+                    </span>
+                `).join('');
+            }
+
+            // Populate all 5 distinct values
+            document.getElementById('val5-purchase').textContent = formatRM(tx.purchaseSen);
+            document.getElementById('val5-payment').textContent = formatRM(tx.paidSen);
+            document.getElementById('val5-change').textContent = formatRM(tx.changeSen);
+            document.getElementById('val5-actual').textContent = formatRM(tx.actualSpendingSen);
+            document.getElementById('val5-rembudget').textContent = formatRM(tx.remainingBudgetSen);
+        }
+
+        /**
+         * ====================================================================
+         * 10. STAGE 5: SHOPPING RECEIPT & NEW MISSION FLOW
+         * ====================================================================
+         */
+        function renderReceiptStage() {
+            const tx = state.lastTransaction;
+            if (!tx) return;
+
+            document.getElementById('celebration-group-subtitle').textContent = `${state.groupName} • Kelas 2 Bijak`;
+            document.getElementById('receipt-group-info').textContent = state.groupName;
+
+            const tbody = document.getElementById('receipt-items-tbody');
+            tbody.innerHTML = tx.items.map(item => `
+                <tr>
+                    <td class="py-2 font-semibold text-slate-800">${item.name}</td>
+                    <td class="py-2 text-center text-slate-600">${item.qty}</td>
+                    <td class="py-2 text-right text-slate-600">${formatRM(item.priceSen)}</td>
+                    <td class="py-2 text-right font-bold text-slate-900">${formatRM(item.subtotalSen)}</td>
+                </tr>
+            `).join('');
+
+            document.getElementById('receipt-total-purchase').textContent = formatRM(tx.purchaseSen);
+            document.getElementById('receipt-amount-paid').textContent = formatRM(tx.paidSen);
+            document.getElementById('receipt-change-received').textContent = formatRM(tx.changeSen);
+            document.getElementById('receipt-actual-spending').textContent = formatRM(tx.actualSpendingSen);
+            document.getElementById('receipt-remaining-budget').textContent = formatRM(tx.remainingBudgetSen);
+        }
+
+        function startNewMissionSameGroup() {
+            state.cart = [];
+            state.selectedPayment = {};
+            state.transactionCompleted = false;
+            state.victorySoundPlayed = false;
+            state.lastTransaction = null;
+            state.stock = JSON.parse(JSON.stringify(INITIAL_DENOMINATIONS));
+            saveState();
+            goToStage(2);
+        }
+
+        /**
+         * ====================================================================
+         * 11. GUIDED GROUP DISCUSSION CHAT ("JOM BINCANG BERSAMA!")
+         * ====================================================================
+         */
+        function setDiscussionPhase(phaseNum) {
+            state.discussionPhase = phaseNum;
+            saveState();
+
+            // Update tab styles
+            document.querySelectorAll('.phase-tab').forEach(btn => {
+                const p = parseInt(btn.getAttribute('data-phase'), 10);
+                if (p === phaseNum) {
+                    btn.className = "phase-tab px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 text-white";
+                } else {
+                    btn.className = "phase-tab px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-50 text-indigo-800 hover:bg-indigo-100";
+                }
+            });
+
+            const phaseData = DISCUSSION_PHASES[phaseNum];
+            document.getElementById('discussion-phase-title').textContent = phaseData.title;
+
+            const listEl = document.getElementById('discussion-prompts-list');
+            listEl.innerHTML = phaseData.questions.map(q => `
+                <button onclick="useDiscussionPrompt('${q.replace(/'/g, "\\'")}')"
+                    class="w-full text-left bg-white hover:bg-indigo-100/80 border border-indigo-200 rounded-xl p-2.5 text-xs font-medium text-slate-800 flex items-center justify-between gap-2 transition">
+                    <span>${q}</span>
+                    <span class="text-[10px] font-bold text-indigo-600 shrink-0 bg-indigo-50 px-2 py-0.5 rounded-md">Tanya ↗</span>
+                </button>
+            `).join('');
+        }
+
+        function useDiscussionPrompt(questionText) {
+            addChatMessage("💬 Soalan Panduan", questionText);
+        }
+
+        function sendQuickReaction(reactionText) {
+            const sender = document.getElementById('chat-sender-role').value;
+            addChatMessage(sender, reactionText);
+        }
+
+        function handleChatSubmit(e) {
+            e.preventDefault();
+            const input = document.getElementById('chat-text-input');
+            const text = input.value.trim();
+            if (!text) return;
+
+            const sender = document.getElementById('chat-sender-role').value;
+            addChatMessage(sender, text);
+            input.value = '';
+        }
+
+        function addChatMessage(sender, text) {
+            const now = new Date();
+            const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+            state.chatHistory.push({ sender, text, time: timeStr });
+            saveState();
+            renderChatMessages();
+        }
+
+        function clearChatHistory() {
+            state.chatHistory = [
+                { sender: "🏪 Pak Cik Kedai", text: "Catatan perbincangan telah dibersihkan. Teruskan perbincangan kumpulan!", time: "Baru" }
+            ];
+            saveState();
+            renderChatMessages();
+        }
+
+        function renderChatMessages() {
+            const box = document.getElementById('chat-messages-box');
+            box.innerHTML = state.chatHistory.map(msg => `
+                <div class="bg-slate-50 border border-slate-200 rounded-xl p-2">
+                    <div class="flex items-center justify-between text-[10px] font-bold text-indigo-800 mb-0.5">
+                        <span>${msg.sender}</span>
+                        <span class="text-slate-400 font-normal">${msg.time}</span>
+                    </div>
+                    <p class="text-slate-800 leading-snug">${escapeHtml(msg.text)}</p>
+                </div>
+            `).join('');
+            box.scrollTop = box.scrollHeight;
+        }
+
+        function escapeHtml(str) {
+            return str.replace(/[&<>"']/g, m => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[m]));
+        }
+
+        /**
+         * ====================================================================
+         * 12. ROLES & MODAL HELPERS
+         * ====================================================================
+         */
+        function updateRoleName(index, val) {
+            state.roleNames[index] = val;
+            saveState();
+        }
+
+        function updateGroupName(val) {
+            state.groupName = val;
+            saveState();
+        }
+
+        function openResetModal() {
+            const backdrop = document.getElementById('custom-modal-backdrop');
+            document.getElementById('modal-icon').textContent = "🔄";
+            document.getElementById('modal-title').textContent = "Mula Semula Aktiviti?";
+            document.getElementById('modal-body').textContent = "Semua pilihan barang dalam bakul, bayaran dan catatan akan dikembalikan ke asal (RM80.00).";
+            document.getElementById('modal-actions').innerHTML = `
+                <button onclick="closeCustomModal()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs">Batal</button>
+                <button onclick="confirmFullReset()" class="btn-game px-4 py-2 rounded-xl bg-rose-500 hover:bg-rose-400 text-white font-bold text-xs">Ya, Mula Semula</button>
+            `;
+            backdrop.classList.remove('hidden');
+            backdrop.classList.add('flex');
+        }
+
+        function closeCustomModal() {
+            const backdrop = document.getElementById('custom-modal-backdrop');
+            backdrop.classList.add('hidden');
+            backdrop.classList.remove('flex');
+        }
+
+        function confirmFullReset() {
+            localStorage.removeItem('misi_bijak_berbelanja_v1');
+            state = {
+                currentStage: 1,
+                selectedCategory: 'Semua',
+                groupName: 'Kumpulan 1 (Bijak)',
+                roleNames: ['', '', '', ''],
+                cart: [],
+                stock: JSON.parse(JSON.stringify(INITIAL_DENOMINATIONS)),
+                selectedPayment: {},
+                transactionCompleted: false,
+                victorySoundPlayed: false,
+                soundEnabled: state.soundEnabled,
+                lastTransaction: null,
+                discussionPhase: 1,
+                chatHistory: [
+                    { sender: "🏪 Pak Cik Kedai", text: "Hai kumpulan! Gunakan ruang ini untuk berbincang sebelum membuat pilihan.", time: "Mula" }
+                ]
+            };
+            closeCustomModal();
+            initApp();
+        }
+
+        /**
+         * ====================================================================
+         * 13. INITIALIZATION
+         * ====================================================================
+         */
+        function initApp() {
+            loadState();
+            updateSoundToggleUI();
+
+            // Restore group & role inputs
+            document.getElementById('group-name-input').value = state.groupName || 'Kumpulan 1 (Bijak)';
+            state.roleNames.forEach((name, i) => {
+                const el = document.getElementById(`role-name-${i}`);
+                if (el) el.value = name || '';
+            });
+
+            setDiscussionPhase(state.discussionPhase || 1);
+            renderChatMessages();
+            updateTopBudgetDisplay();
+            goToStage(state.currentStage || 1);
+        }
+
+        window.addEventListener('DOMContentLoaded', initApp);
+    </script>
+</body>
+</html>
